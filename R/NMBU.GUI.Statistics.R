@@ -284,6 +284,7 @@ plsRegressionModel <- function(){
   onOK <- function(){ # Actions to perform
     x <- getSelection(xBox)
     y <- getSelection(yBox)
+	.activeDataSet <- ActiveDataSet()
     closeDialog()
     if (0 == length(y)) {
       UpdateModelNumber(-1)
@@ -1319,6 +1320,7 @@ generalizedLinearModelNMBU <- function(){
     tkselection.set(linkBox, which(canLink == availLinks) - 1)
   }
   onOK <- function(){
+	.activeDataSet <- ActiveDataSet()
     check.empty <- gsub(" ", "", tclvalue(lhsVariable))
     if ("" == check.empty) {
       errorCondition(recall=generalizedLinearModelNMBU, model=TRUE, message=gettextRcmdr("Left-hand side of model empty."))

@@ -21,6 +21,7 @@
 \alias{boxPlotNMBU}
 \alias{CIplot}
 \alias{clustP}
+\alias{coefNMBU}
 \alias{confint.mvr}
 \alias{Confint.mvr}
 \alias{contrastGUI}
@@ -204,6 +205,7 @@
   \item \code{backwardDrop()}               
   \item \code{backwardForward()}            
   \item \code{bestSubsets()}                
+  \item \code{coefNMBU()}                
   \item \code{contrastGUI()}                
   \item \code{contrastGUI2()}               
   \item \code{covarianceMatrix()}           

@@ -58,6 +58,7 @@
     item    modelsMenu  		cascade           "F-based stepwise/subset   (NMBU)"                           	stepwiseMenu                ""          				""
     item    modelsMenu      	command           "Add observation statistics to data..."         				addObservationStatisticsNMBU "activeModelP()"          	""
     item	modelsMenu			command			  "Prediction ..."      										predictRegressionModel		"lmP() || plsP() || daP() || glmP()"	""
+    item	modelsMenu			command			  "Regression coefficients ..."      							coefNMBU					"lmP() || plsP() || daP() || glmP()"	""
     item	modelsMenu			command			  "Discriminant scores ..."      								DA.coef						"daP()"		  				""
     item	modelsMenu			command			  "Hierarchical merging ..."      								hclust.list					"clustP()"		  			""
     item	modelsMenu			command			  "Test contrast in ANOVA ..."      							contrastGUI					"aovP()"		  			""

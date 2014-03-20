@@ -798,6 +798,7 @@ PRESS.GUI <- function(){
 ######################################
 ## Customized observation statistics
 addObservationStatisticsNMBU <- function(){
+  .activeDataSet <- ActiveDataSet()
   .activeModel <- ActiveModel()
   if (is.null(.activeModel)) return()
   addVariable <- function(name, type=NULL){
@@ -936,4 +937,17 @@ invXtXGUI <- function(){
   tkgrid(mainFrame, row=1, column=1, columnspan=1, rowspan=1, sticky="w")
   tkgrid(buttonsFrame, sticky="w", row=2, column=1, columnspan=1)
   dialogSuffix(rows=2, columns=1)
+}
+
+#####################################
+# Display regression coefficients
+coefNMBU <- function(){
+  .activeModel <- ActiveModel()
+  model.class <- justDoIt(paste("class(", .activeModel, ")", sep=""))[1]
+  if(model.class=="mvr"){
+	ncomp <- justDoIt(paste(.activeModel, "$ncomp", sep=""))
+	doItAndPrint(paste("coef(", ActiveModel(), ", ncomp=", ncomp, ")", sep=""))
+  } else {
+    doItAndPrint(paste("coef(", ActiveModel(), ")", sep=""))
+  }
 }

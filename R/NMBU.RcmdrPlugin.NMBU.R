@@ -35,6 +35,14 @@
 	options(contrasts=c('contr.sum','contr.poly'))
 	tkbind(CommanderWindow(), "<Control-e>", onExportE)
 	tkbind(CommanderWindow(), "<Control-E>", onExportN)
+	if(!("package:nmbu"%in%search())){
+	  packageStartupMessage(paste("\n----------------------------------------------------------"), domain="R-RcmdrPlugin.NMBU")
+	  packageStartupMessage(paste("Re-open a closed R Commander with the command: Commander()\nPlease report bugs to kristian.liland@nmbu.no\n"), domain="R-RcmdrPlugin.NMBU")
+	  packageStartupMessage(paste("Currently installed:\n", R.Version()$version.string, "", sep=""), domain="R-RcmdrPlugin.NMBU")
+	  packageStartupMessage(paste("R Commander version ", packageDescription("Rcmdr")[["Version"]], "", sep=""), domain="R-RcmdrPlugin.NMBU")
+	  packageStartupMessage(paste("RcmdrPlugin.NMBU version ", packageDescription("RcmdrPlugin.NMBU")[["Version"]], "", sep=""), domain="R-RcmdrPlugin.NMBU")
+	  packageStartupMessage(paste("----------------------------------------------------------\n"), domain="R-RcmdrPlugin.NMBU")
+	}
 }
 
 .onLoad <- function(...){
@@ -46,7 +54,7 @@
 	save.options <- options(warn=-1)
 	on.exit(options(save.options))
 	required.packages <- rev(c("abind", "e1071",  "lattice", "leaps", "xtable",
-					 "multcomp", "lme4", "gmodels", "pbkrtest", "vcd", "mvtnorm"))
+					 "multcomp", "lme4", "gmodels", "pbkrtest", "vcd", "mvtnorm", "nnet"))
 	if (WindowsP()) required.packages <- c(required.packages, c("RODBC", "XLConnect"))
 	check <- options("Rcmdr")[[1]]$check.packages
 	if (length(check) > 0 && !check) return()

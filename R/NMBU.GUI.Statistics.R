@@ -1556,6 +1556,7 @@ multinomialLogitModelNMBU <- function(){
 ################################
 # Customized ordinalRegression
 ordinalRegressionModelNMBU <- function(){
+  Library("nnet")
   initializeDialog(title=gettextRcmdr("Ordinal Regression Model"))
   .activeModel <- ActiveModel()
   .activeDataSet <- ActiveDataSet()

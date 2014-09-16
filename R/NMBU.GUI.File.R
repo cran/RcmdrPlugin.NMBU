@@ -5,9 +5,13 @@
 ##
 
 
+#    item	fileMenu			command			  "Save project ..."						      				saveAll						""		  					""
+#    item	fileMenu			command			  "Save project as ..."				    						saveAllAs					""		  					""
+#    item	fileMenu			command			  "Open project ..."      										loadAll						""		  					""
+#    item    fileMenu        	separator         ""                                              				""                          ""          				""
 #####################################
 # Safe log, output and data
-saveAllWorker <- function(allFile){
+saveAllWorker <- function(allFile){ # Denne fungerer ikke med nyere R Commander
   # Collect, compress and save files
   wd <- getwd()
   dir.create(paste(wd,"/tmpRCE",sep=""))

@@ -19,6 +19,7 @@
 \alias{bestSubsets}
 \alias{binomialDistributionPlotNMBU}
 \alias{boxPlotNMBU}
+\alias{CIgrandMeanNMBU}
 \alias{CIplot}
 \alias{clustP}
 \alias{coefNMBU}
@@ -26,6 +27,7 @@
 \alias{Confint.mvr}
 \alias{contrastGUI}
 \alias{contrastGUI2}
+\alias{contP}
 \alias{covarianceMatrix}
 \alias{createSequence}
 \alias{DA.coef}

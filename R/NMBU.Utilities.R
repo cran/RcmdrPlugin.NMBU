@@ -18,6 +18,17 @@ clustP <- function() length(listHclustSolutions())>0
 pcaP <- function() activeModelP() && any(class(get(ActiveModel()))[1] == c('prcomp'))
 plsP <- function() activeModelP() && any(class(get(ActiveModel()))[1] == c('mvr'))
 daP <- function() activeModelP() && (any(class(get(ActiveModel()))[1] == c('lda')) || any(class(get(ActiveModel()))[1] == c('qda')))
+contP <- function(){ # Check if model contains continuous variable
+	.activeModel <- ActiveModel()
+    effects <- eval(parse(text=paste("attr(terms(formula(",.activeModel,")),'term.labels')", sep="")))
+	for(i in 1:length(effects)){
+		nu <- eval(parse(text=paste("class(", ActiveDataSet(), '$', effects[[i]],")")))
+		if(any(nu%in%c("numeric","integer"))){
+			return(FALSE)
+		}
+	}
+	TRUE
+}
 variablesP <- function(n=1) activeDataSetP() && length(listVariables()) >= n
 mixP <- function(){
 	activeModelP() && any(class(get(ActiveModel()))[1] == c('lm'))

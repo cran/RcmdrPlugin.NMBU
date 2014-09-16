@@ -34,4 +34,7 @@ if (getRversion() >= "2.15.1")
 		"base", "high", "newDataSet", ".activeDataSet", ".activeModel", "outmat","rss",
 		"rsq","adjr2","pushViewport","viewport","upViewport","pressresVariable","presspredVariable",
 		 "selectFrame1", "selectFrame2", "selectFrame3", "selectFrame4", "selectFrame5", "selectFrame6",
-		 ".groups",".levels","multinom","typeFrame", "tkget", "tktag.add", "tkyview.moveto"))
+		 ".groups",".levels","multinom","typeFrame", "tkget", "tktag.add", "tkyview.moveto", "panel.rug",
+		 "var.jack","fparse","fractions","panel.segments","panel.text","panel.points","panel.levelplot",
+		 "trellis.par.set","trellis.focus","trellis.unfocus","trellis.par.get","panel.xyplot","current.panel.limits",
+		 "panel.axis","dmvnorm","fitdistr","xtable","Rows","xyplot","levelplot"))

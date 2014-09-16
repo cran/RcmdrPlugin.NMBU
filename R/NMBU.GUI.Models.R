@@ -951,3 +951,9 @@ coefNMBU <- function(){
     doItAndPrint(paste("coef(", ActiveModel(), ")", sep=""))
   }
 }
+
+#####################################
+# CI for the model grand
+CIgrandMeanNMBU <- function(){
+	doItAndPrint(paste("CIgrandMean(", ActiveModel(), ")", sep=""))
+}

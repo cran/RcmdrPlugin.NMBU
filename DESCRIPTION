@@ -1,8 +1,8 @@
 Package: RcmdrPlugin.NMBU
 Type: Package
 Title: R Commander Plug-In for Statistics at NMBU
-Version: 1.7.4
-Date: 2014-09-16
+Version: 1.7.5
+Date: 2014-09-19
 Author: Kristian Hovde Liland, Solve Sæbø
 Maintainer: Kristian Hovde Liland <kristian.liland@nmbu.no>
 Encoding: latin1
@@ -15,7 +15,7 @@ License: GPL (>= 2)
 LazyLoad: yes
 LazyData: yes
 RcmdrModels: mvr, lda, qda, prcomp, mer, rsm, glmerMod, lmerMod
-Packaged: 2014-09-16 10:14:07 UTC; kristian.liland
+Packaged: 2014-09-19 08:22:26 UTC; kristian.liland
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2014-09-16 12:34:40
+Date/Publication: 2014-09-19 10:39:16

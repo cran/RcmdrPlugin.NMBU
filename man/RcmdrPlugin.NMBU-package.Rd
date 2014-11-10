@@ -141,6 +141,7 @@
 \alias{twoWayTableNMBU}
 \alias{updateFactor}
 \alias{variablesP}
+\alias{xtable.numSummary}
 \docType{package}
 \title{
   R Commander statistics plugin (RcmdrPlugin.NMBU)

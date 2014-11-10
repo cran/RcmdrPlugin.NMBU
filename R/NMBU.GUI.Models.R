@@ -723,6 +723,7 @@ postHocGUI <- function(){
 #####################################
 # Plot mixture experiment
 mixtureGUI <- function(){
+  require(lattice)
   initializeDialog(title=gettextRcmdr("Plot response surface for mixture design"))
   .numeric <- Numeric()
   comboVar <- tclVar()

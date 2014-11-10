@@ -307,8 +307,12 @@ numSummaryNMBU <- function(data,
 	result$statistics <- statistics
 	result$n <- n
 	if (any(NAs > 0)) result$NAs <- NAs
-	class(result) <- "numSummary"
+	class(result) <- c("numSummary")
 	result
+}
+xtable.numSummary <- function(x, caption = NULL, label = NULL, align = NULL, digits = NULL, 
+                              display = NULL, ...){
+  xtable(x$table, caption, label, align, digits, display, ...)
 }
 
 

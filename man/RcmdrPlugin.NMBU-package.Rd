@@ -45,7 +45,6 @@
 \alias{dummy}
 \alias{enterTableNMBU}
 \alias{export.instructions}
-\alias{extend.colnames}
 \alias{Fisher}
 \alias{Fisher.aov}
 \alias{fittedLinePlot}
@@ -127,8 +126,6 @@
 \alias{spearson}
 \alias{stepWise}
 \alias{stepWiseBack}
-\alias{summaryMultinom}
-\alias{summaryOrdinal}
 \alias{sumSq}
 \alias{tally}
 \alias{tally.GUI}

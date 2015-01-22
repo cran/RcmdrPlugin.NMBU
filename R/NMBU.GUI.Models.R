@@ -71,6 +71,9 @@ predictRegressionModel <- function(){
     the.effs <- list()
     for(i in 1:n.eff){
       the.effs[[i]] <- tclvalue(effNames[[i]])
+	  if(grepl(',',the.effs[[i]],fixed=TRUE)){
+		errorCondition(recall=predictRegressionModel, message=gettextRcmdr("Use period (.) instead of comma (,) as decimal mark."))
+	  }
     }
     if(model.class == "lm"){
       levs <- tclvalue(levelName)
@@ -516,15 +519,12 @@ contrastGUI2 <- function(varNumb,levs){
       return()
     }
     # level.name <- justDoIt(paste("names(",.activeModel, "$xlevels)", sep=""))
-	if(require(gmodels)){
+	Library("gmodels")
     command <- paste("print(fit.contrast(model=", ActiveModel(), ", varname='",fn, "', df=TRUE, coeff=c(", effValues[1], sep="")
     for(i in 2:n.eff){
       command <- paste(command, ", ", effValues[i], sep="")
     }
     command <- paste(command, "), conf.int=", levelValue,"))", sep="")
-	} else {
-		warning("Package gmodels not installed")
-	}
     
     # If interaction, test per level, not across levels
     has.interaction <- justDoIt(paste("max(apply(attr(",.activeModel, "$terms,'factors'),1,sum))>1", sep=""))
@@ -723,7 +723,7 @@ postHocGUI <- function(){
 #####################################
 # Plot mixture experiment
 mixtureGUI <- function(){
-  require(lattice)
+  Library("lattice")
   initializeDialog(title=gettextRcmdr("Plot response surface for mixture design"))
   .numeric <- Numeric()
   comboVar <- tclVar()

@@ -910,11 +910,8 @@ enterTableNMBU <- function(){
         doItAndPrint(command)
         doItAndPrint("cat('Adjusted residuals\n');round((.Table-.Test$expected)/sqrt(.Test$expected*tcrossprod((1-apply(.Table,1,sum)/sum(.Table)),(1-apply(.Table,2,sum)/sum(.Table)))),2)")
       }
-	  if(require(vcd)){
-		doItAndPrint("assocstats(.Table)")
-	  } else {
-	    warning("Package vcd not installed")
-	  }
+	  Library("vcd")
+      doItAndPrint("assocstats(.Table)")
       logger("remove(.Test)")
       remove(.Test, envir=.GlobalEnv)
     }
@@ -998,11 +995,8 @@ twoWayTableNMBU <- function(){
         doItAndPrint(command)
         doItAndPrint("cat('Adjusted residuals\n');round((.Table-.Test$expected)/sqrt(.Test$expected*tcrossprod((1-apply(.Table,1,sum)/sum(.Table)),(1-apply(.Table,2,sum)/sum(.Table)))),2)")
       }
-	  if(require(vcd)){
-		doItAndPrint("assocstats(.Table)")
-	  } else {
-	    warning("Package vcd not installed")
-	  }
+	  Library("vcd")
+	  doItAndPrint("assocstats(.Table)")
       logger("remove(.Test)")
       remove(.Test, envir=.GlobalEnv)
     }
@@ -1445,6 +1439,7 @@ resetGLMNMBU <- function(){
 ################################
 # Customized multiLogit
 multinomialLogitModelNMBU <- function(){
+  Library("nnet")
   initializeDialog(title=gettextRcmdr("Multinomial Logit Model"))
   .activeModel <- ActiveModel()
   .activeDataSet <- ActiveDataSet()

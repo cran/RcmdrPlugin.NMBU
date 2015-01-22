@@ -92,7 +92,6 @@
     item    diagnosticsMenu 	command           "PRESS, R2pred, RMSEP"             							PRESS.GUI                   "(lmP() || plsP())" 		"packageAvailable('car')"
     item    diagnosticsMenu 	command           "Deviance tests"             									deviance_tests_GUI          "activeModelP()" 			""
     item    diagnosticsMenu 	command           "Store and/or display (X'X)^-1"								invXtXGUI			        "activeModelP()" 			""
-    item    dataMenu        	command           "New data set (OS X)..."                               		newDataSetOSX               ""          				"MacOSXP()"
     item    dataMenu 			command           "Automatic import from clipboard"             				auto.import.GUI             "" 							""
     item    dataMenu 			command           "Export last result to clipboard" 							onExport		            "" 							""
     item    dataMenu 			command           "Create data sequence"             							createSequence              "" 							""

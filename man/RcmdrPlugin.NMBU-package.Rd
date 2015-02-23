@@ -67,6 +67,7 @@
 \alias{listHclustSolutions}
 \alias{loadAll}
 \alias{logic.to.letters}
+\alias{lmmP}
 \alias{make.colours}
 \alias{meanCenter}
 \alias{mixed.model}

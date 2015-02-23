@@ -99,7 +99,7 @@ predictRegressionModel <- function(){
     if(model.class == "mvr"){
       command <- paste(command, "), ncomp=", the.comps, ", type='", the.type, "')", sep="")
     } else {
-      if(model.class == "lm"){
+      if(model.class == "lm" || model.class == "lmm"){
         command <- gsub("predict(",  "predict_CI_PI(", command, fixed=TRUE)
         extrap <- tclvalue(extrapVariable)
         if(extrap == gettextRcmdr("1")){

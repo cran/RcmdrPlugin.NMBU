@@ -8,6 +8,7 @@
 
 ################################
 # Model and data availability
+lmmP <- function() activeModelP() && any(class(get(ActiveModel()))[1] == "lmm")
 aovP <- function() lmP()
 # {
 #	.activeModel <- ActiveModel()

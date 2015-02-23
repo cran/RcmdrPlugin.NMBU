@@ -7,3 +7,5 @@ importFrom(MASS,lda)
 importFrom(mixlm,AnovaMix)
 exportPattern("^[^\\.]") # Export all except .functions
  
+S3method(confint, mvr)
+S3method(xtable, numSummary)

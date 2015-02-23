@@ -34,7 +34,7 @@ covarianceMatrix <- function(){
   groupsBox(recall=covarianceMatrix, label=gettextRcmdr("Compute by:"), 
             initialLabel=gettextRcmdr("Compute by groups"), 
             initialGroup=initial.group)
-
+  
   onOK <- function(){ # Actions to perform
     covariances <- tclvalue(covariancesVariable)
     covCor <- tclvalue(covCorVariable)
@@ -47,52 +47,52 @@ covarianceMatrix <- function(){
     closeDialog()
     x <- paste('"', x, '"', sep="")
     .activeDataSet <- ActiveDataSet()
-	if(.groups==FALSE){
-		if(length(w)>0 && w !="-none-"){
-		  if(covCor=="correlation"){
-			doItAndPrint(paste("cov.wt(", .activeDataSet, "[,c(", paste(x, collapse=","),
-							   ")], wt=", .activeDataSet, "$", w ,", cor=TRUE)$cor", sep=""))
-		  } else {
-			doItAndPrint(paste("cov.wt(", .activeDataSet, "[,c(", paste(x, collapse=","),
-							   ")], wt=", .activeDataSet, "$", w ,")$cov", sep=""))
-		  }
-		} else {
-		  type <- ifelse(covCor=="correlation","cor","cov")
-		  if (covariances == "Pearson"){
-			doItAndPrint(paste(type, "(", .activeDataSet, "[,c(", paste(x, collapse=","),
-							   ')], use="complete.obs")', sep=""))
-		  }
-		  else if (covariances == "Spearman"){
-			logger("# Spearman rank-order covariances")
-			doItAndPrint(paste(type, "(", .activeDataSet, "[,c(", paste(x, collapse=","),
-							   ')], use="complete.obs", method="spearman")', sep=""))
-		  }
-		}
-	} else {
-		eval(parse(text=paste(".levels <- levels(", .activeDataSet, "$", .groups, ")", sep="")))
-		for(i in 1:length(.levels)){
-			if(length(w)>0 && w !="-none-"){
-			  if(covCor=="correlation"){
-				doItAndPrint(paste("cov.wt(", .activeDataSet, "[", .activeDataSet, "$", .groups, "=='", .levels[i] ,"',c(", paste(x, collapse=","),
-								   ")], wt=", .activeDataSet, "$", w ,"[", .activeDataSet, "$", .groups, "=='", .levels[i] ,"'], cor=TRUE)$cor", sep=""))
-			  } else {
-				doItAndPrint(paste("cov.wt(", .activeDataSet, "[", .activeDataSet, "$", .groups, "=='", .levels[i] ,"',c(", paste(x, collapse=","),
-								   ")], wt=", .activeDataSet, "$", w ,"[", .activeDataSet, "$", .groups, "=='", .levels[i] ,"'])$cov", sep=""))
-			  }
-			} else {
-			  type <- ifelse(covCor=="correlation","cor","cov")
-			  if (covariances == "Pearson"){
-				doItAndPrint(paste(type, "(", .activeDataSet, "[", .activeDataSet, "$", .groups, "=='", .levels[i] ,"',c(", paste(x, collapse=","),
-								   ')], use="complete.obs")', sep=""))
-			  }
-			  else if (covariances == "Spearman"){
-				logger("# Spearman rank-order covariances")
-				doItAndPrint(paste(type, "(", .activeDataSet, "[", .activeDataSet, "$", .groups, "=='", .levels[i] ,"',c(", paste(x, collapse=","),
-								   ')], use="complete.obs", method="spearman")', sep=""))
-			  }
-			}
-		}
-	}
+    if(.groups==FALSE){
+      if(length(w)>0 && w !="-none-"){
+        if(covCor=="correlation"){
+          doItAndPrint(paste("cov.wt(", .activeDataSet, "[,c(", paste(x, collapse=","),
+                             ")], wt=", .activeDataSet, "$", w ,", cor=TRUE)$cor", sep=""))
+        } else {
+          doItAndPrint(paste("cov.wt(", .activeDataSet, "[,c(", paste(x, collapse=","),
+                             ")], wt=", .activeDataSet, "$", w ,")$cov", sep=""))
+        }
+      } else {
+        type <- ifelse(covCor=="correlation","cor","cov")
+        if (covariances == "Pearson"){
+          doItAndPrint(paste(type, "(", .activeDataSet, "[,c(", paste(x, collapse=","),
+                             ')], use="complete.obs")', sep=""))
+        }
+        else if (covariances == "Spearman"){
+          logger("# Spearman rank-order covariances")
+          doItAndPrint(paste(type, "(", .activeDataSet, "[,c(", paste(x, collapse=","),
+                             ')], use="complete.obs", method="spearman")', sep=""))
+        }
+      }
+    } else {
+      eval(parse(text=paste(".levels <- levels(", .activeDataSet, "$", .groups, ")", sep="")))
+      for(i in 1:length(.levels)){
+        if(length(w)>0 && w !="-none-"){
+          if(covCor=="correlation"){
+            doItAndPrint(paste("cov.wt(", .activeDataSet, "[", .activeDataSet, "$", .groups, "=='", .levels[i] ,"',c(", paste(x, collapse=","),
+                               ")], wt=", .activeDataSet, "$", w ,"[", .activeDataSet, "$", .groups, "=='", .levels[i] ,"'], cor=TRUE)$cor", sep=""))
+          } else {
+            doItAndPrint(paste("cov.wt(", .activeDataSet, "[", .activeDataSet, "$", .groups, "=='", .levels[i] ,"',c(", paste(x, collapse=","),
+                               ")], wt=", .activeDataSet, "$", w ,"[", .activeDataSet, "$", .groups, "=='", .levels[i] ,"'])$cov", sep=""))
+          }
+        } else {
+          type <- ifelse(covCor=="correlation","cor","cov")
+          if (covariances == "Pearson"){
+            doItAndPrint(paste(type, "(", .activeDataSet, "[", .activeDataSet, "$", .groups, "=='", .levels[i] ,"',c(", paste(x, collapse=","),
+                               ')], use="complete.obs")', sep=""))
+          }
+          else if (covariances == "Spearman"){
+            logger("# Spearman rank-order covariances")
+            doItAndPrint(paste(type, "(", .activeDataSet, "[", .activeDataSet, "$", .groups, "=='", .levels[i] ,"',c(", paste(x, collapse=","),
+                               ')], use="complete.obs", method="spearman")', sep=""))
+          }
+        }
+      }
+    }
     tkfocus(CommanderWindow())
   }
   # Set up GUI
@@ -129,8 +129,8 @@ twoProportionTest <- function(){
     testVer <- as.character(tclvalue(testVerVariable))
     closeDialog()
     command <- paste(".Table <- cbind(successes=c(", succ1, ",", succ2, "), failures=c(", fail1, ",", fail2, "))", sep="")
-#    logger(command)
-#    assign(".Table", justDoIt(command), envir=.GlobalEnv)
+    #    logger(command)
+    #    assign(".Table", justDoIt(command), envir=.GlobalEnv)
     doItAndPrint(command)
     doItAndPrint(".Table")
     if(testVer=="pooled"){
@@ -141,7 +141,7 @@ twoProportionTest <- function(){
     if (test == "normal") doItAndPrint(paste("prop.test.ordinary(.Table, alternative='", 
                                              alternative, "', conf.level=", level, ", correct=FALSE, pooled=", pooled, sep=""))
     else doItAndPrint(paste("prop.test.ordinary(.Table, alternative='", 
-                                                     alternative, "', conf.level=", level, ", correct=TRUE, pooled=", pooled, sep=""))
+                            alternative, "', conf.level=", level, ", correct=TRUE, pooled=", pooled, sep=""))
     tkfocus(CommanderWindow())
   }
   # Set up GUI
@@ -204,8 +204,8 @@ proportionTest <- function(){
     p <- tclvalue(pVariable)
     closeDialog()
     command <- paste(".Table <- cbind(successes=", succ, ", failures=", fail, ")", sep="")
-#    logger(command)
-#    assign(".Table", justDoIt(command), envir=.GlobalEnv)
+    #    logger(command)
+    #    assign(".Table", justDoIt(command), envir=.GlobalEnv)
     doItAndPrint(command)
     doItAndPrint(".Table")
     if(testVer=="ordinaryVer"){
@@ -284,7 +284,7 @@ plsRegressionModel <- function(){
   onOK <- function(){ # Actions to perform
     x <- getSelection(xBox)
     y <- getSelection(yBox)
-	.activeDataSet <- ActiveDataSet()
+    .activeDataSet <- ActiveDataSet()
     closeDialog()
     if (0 == length(y)) {
       UpdateModelNumber(-1)
@@ -360,8 +360,8 @@ plsRegressionModel <- function(){
     }
     command <- paste(pcrpls, "(", y, "~", paste(x, collapse="+"),
                      ", data=", ActiveDataSet(), subset, ", ncomp=", as.numeric(ncomp), validate, ")", sep="")
-#    logger(paste(modelValue, " <- ", command, sep=""))
-#    assign(modelValue, justDoIt(command), envir=.GlobalEnv)
+    #    logger(paste(modelValue, " <- ", command, sep=""))
+    #    assign(modelValue, justDoIt(command), envir=.GlobalEnv)
     doItAndPrint(paste(modelValue, " <- ", command, sep=""))
     if(is.factor(.the.y)){
       justDoIt(paste(ActiveDataSet(), "$", y, " <- .the.y", sep=""))
@@ -467,28 +467,25 @@ principalComponentsStat <- function(){
         return()
       }
     }
-    subset <- if (trim.blanks(subset) == gettextRcmdr("<all valid cases>")) "" else paste(", subset=", subset, sep="")
+    subset <- if (trim.blanks(subset) == "" || trim.blanks(subset) == gettextRcmdr("<all valid cases>")) ""
+    else paste(", subset=", subset, sep="")
     correlations <- if (correlations == "1") "TRUE" else "FALSE"
     .activeDataSet <- ActiveDataSet()
-    if(center == "1"){
-      command <- paste("prcomp(~", paste(x, collapse="+"), ", center=TRUE, scale.=", correlations,
-                       ", data=", .activeDataSet, subset, ")", sep="")
-    }
-    else {
-      command <- paste("prcomp(~", paste(x, collapse="+"), ", center=FALSE, scale.=", correlations,
-                       ", data=", .activeDataSet, subset, ")", sep="")
-    }
-#    assign(modelValue, justDoIt(command), envir=.GlobalEnv)
-#    logger(paste(modelValue," <- ", command, sep=""))
-    doItAndPrint(paste(modelValue," <- ", command, sep=""))
-    doItAndPrint(paste("unclass(loadings(", modelValue, "))  # component loadings"))
-    doItAndPrint(paste(modelValue,"$sdev^2  # component variances"))
-    doItAndPrint(paste("summary(", modelValue, ") # proportions of variance"))
-    activeModel(modelValue)
-    if (screeplot == "1") {
-      justDoIt(paste("screeplot(", modelValue, ")"))
-      logger(paste("screeplot(", modelValue, ")"))
-    }
+    doItAndPrint(paste("\n  ", modelValue, " <- princomp(~", paste(x, collapse = "+"), 
+                       ", cor=", correlations, ", data=", .activeDataSet, 
+                       subset, ")", sep = ""))
+    cmds <- character(8)
+    cmds[1] <- "local({"
+    cmds[2] <- '  cat("\\nComponent loadings:\\n")'
+    cmds[3] <- paste("  print(unclass(loadings(", modelValue, ")))", sep="")
+    cmds[4] <- '  cat("\\nComponent variances:\\n")'
+    cmds[5] <- paste("  print(", modelValue, "$sd^2)", sep="")
+    cmds[6] <- '  cat("\\n")'
+    cmds[7] <- paste("  print(summary(", modelValue, "))", sep="")
+    cmds[8] <- if (screeplot == "1") paste("  screeplot(", modelValue, ")\n", sep="") else ""
+    cmds <- paste(cmds[1:(7 + (screeplot == "1"))], collapse="\n")
+    commands <- ""
+    
     if (addPC == "1") {
       initializeDialog(subdialog, title=gettextRcmdr("Number of Components"))
       tkgrid(labelRcmdr(subdialog, text=gettextRcmdr("Number of components to retain:"), fg="blue"), sticky="w")    
@@ -505,19 +502,26 @@ principalComponentsStat <- function(){
       tkgrid(componentsSlider, componentsShow, sticky="nw")
       tkgrid(sliderFrame, sticky="w")
       tkgrid(subButtonsFrame, sticky="w")
-      dialogSuffix(subdialog, onOK=onOKsub, rows=2, columns=1, focus=subdialog)
+      dialogSuffix(subdialog, onOK=onOKsub, rows=2, columns=1, focus=subdialog, force.wait=TRUE)
       if ((ncomponents <- getRcmdr("ncomponents")) > 0){
+        prefix <- paste("  ", .activeDataSet, " <<- within(", .activeDataSet, ", {", sep="")
+        if (screeplot != "1") prefix <- paste("\n", prefix, sep="")
+        commands <- character(ncomponents)
         for(i in 1:ncomponents){
           var <- paste("PC", i, sep="")
           if (is.element(var, Variables())) {
             if ("no" == tclvalue(checkReplace(var))) next
           }
-          justDoIt(paste(.activeDataSet, "$PC", i, " <- scores(", modelValue, ")[,", i, "]", sep=""))
-          logger(paste(.activeDataSet, "$PC", i, " <- scores(", modelValue, ")[,", i, "]", sep=""))
+          commands[ncomponents - i + 1] <- paste("    PC", i, " <- ", modelValue, "$scores[,", 
+                                                 i, "]", sep = "")
         }
-        activeDataSet(.activeDataSet)
+        suffix <- "  })"
+        commands <- paste(c(prefix, commands, suffix), collapse="\n")
       }
     }
+    doItAndPrint(commands)
+    doItAndPrint(paste(cmds, "\n})", sep=""))
+    if (addPC == "1") activeDataSet(.activeDataSet, flushDialogMemory=FALSE)
     activeModel(modelValue)
     tkfocus(CommanderWindow())
   }
@@ -615,9 +619,9 @@ discriminantAnalysis <- function(){
     else {
       command <- paste(command, ")", sep="")
     }
-#    assign(modelValue, justDoIt(command), envir=.GlobalEnv)
-#    logger(paste(modelValue," <- ", command, sep=""))
-	doItAndPrint(paste(modelValue," <- ", command, sep=""))
+    #    assign(modelValue, justDoIt(command), envir=.GlobalEnv)
+    #    logger(paste(modelValue," <- ", command, sep=""))
+    doItAndPrint(paste(modelValue," <- ", command, sep=""))
     if(the.cv == gettextRcmdr("0")){
       doItAndPrint(paste("confusion(", ActiveDataSet(), "$", y, "[", the.subset, "]", ", predict(", modelValue, ")$class)  # confusion matrix", sep=""))
     }
@@ -756,8 +760,8 @@ hierarchicalClusterVariable <- function(){
     }
     command <- paste("hclust(", dx, " , method= ", '"', clusMethod, '"',
                      ")", sep="")
-#    assign(solution, justDoIt(command), envir=.GlobalEnv)
-#    logger(paste(solution, " <- ", command, sep=""))
+    #    assign(solution, justDoIt(command), envir=.GlobalEnv)
+    #    logger(paste(solution, " <- ", command, sep=""))
     doItAndPrint(paste(solution, " <- ", command, sep=""))
     if (dendro == "1") {
       justDoIt(paste("plot(", solution, ", main= ",'"',
@@ -795,6 +799,7 @@ hierarchicalClusterVariable <- function(){
 ############################
 ## Customized two-way table
 enterTableNMBU <- function(){
+  Library("vcd")
   env <- environment()
   initializeDialog(title=gettextRcmdr("Enter Two-Way Table"))
   outerTableFrame <- tkframe(top)
@@ -879,45 +884,46 @@ enterTableNMBU <- function(){
     closeDialog()
     command <- paste("matrix(c(", paste(counts, collapse=","), "), ", nrows, ", ", ncols,
                      ", byrow=TRUE)", sep="")
-#    assign(".Table", justDoIt(command), envir=.GlobalEnv)
-#    logger(paste(".Table <- ", command, sep=""))
-    doItAndPrint(paste(".Table <- ", command, sep=""))
-    command <- paste("c(",paste(paste("'", row.names, "'", sep=""), collapse=", "), ")", sep="")
-    justDoIt(paste("rownames(.Table) <- ", command, sep=""))
-    logger(paste("rownames(.Table) <- ", command, sep=""))
-    command <- paste("c(",paste(paste("'", col.names, "'", sep=""), collapse=", "), ")", sep="")
-    justDoIt(paste("colnames(.Table) <- ", command, sep=""))
-    logger(paste("colnames(.Table) <- ", command, sep=""))
-    doItAndPrint(".Table  # Counts")
-    if (percents == "row") doItAndPrint("rowPercents(.Table) # Row Percentages")
-    if (percents == "column") doItAndPrint("colPercents(.Table) # Column Percentages")
-    if (percents == "total") doItAndPrint("totPercents(.Table) # Percentage of Total")
+    
+    commandA <- paste(command, "\n  dimnames(.Table) <- list(c(",paste(paste("'", row.names, "'", sep=""), collapse=", "), "), c(",paste(paste("'", col.names, "'", sep=""), collapse=", "), "))", sep="")
+    
+    command <- paste("local({\n  .Table <- ", commandA, '\n  cat("\\nFrequency table:\\n")\n  print(.Table)', sep="")
+    command.2 <- paste("local({\n  .warn <- options(warn=-1)\n  .Table <- ", commandA, sep="")
+    if (percents == "row") 
+      command <- paste(command, '\n  cat("\\nRow percentages:\\n")\n  print(rowPercents(.Table))',
+                       sep="")
+    else if (percents == "column") 
+      command <-  paste(command, '\n  cat("\\nColumn percentages:\\n")\n  print(colPercents(.Table))',
+                        sep="")
+    else if (percents == "total") 
+      command <- paste(command, '\n  cat("\\nTotal percentages:\\n")\n  print(totPercents(.Table))',
+                       sep="")
     if (chisq == 1) {
-      command <- "chisq.test(.Table, correct=FALSE)"
-#      logger(paste(".Test <- ", command, sep=""))
-#      assign(".Test", justDoIt(command), envir=.GlobalEnv)
-      doItAndPrint(paste(".Test <- ", command, sep=""))
-      if (expected == 1) doItAndPrint(".Test$expected # Expected Counts")
+      command <- paste(command, "\n  .Test <- chisq.test(.Table, correct=FALSE)", sep="")
+      command.2 <- paste(command.2, "\n  .Test <- chisq.test(.Table, correct=FALSE)", sep="")
+      command <- paste(command, "\n  print(assocstats(.Table))", sep="")
+      if (expected == 1)
+        command <- paste(command, '\n  cat("\\nExpected counts:\\n")\n  print(.Test$expected)', sep="")
+      if (chisqComp == 1) {
+        command <- paste(command, '\n  cat("\\nChi-square components:\\n")\n  print(round(.Test$residuals^2, 2))', sep="")
+        command <- paste(command, '\n  cat("\\nAdjusted residuals:\\n\")\n  ', "print(round((.Table-.Test$expected)/sqrt(.Test$expected*tcrossprod((1-apply(.Table,1,sum)/sum(.Table)),(1-apply(.Table,2,sum)/sum(.Table)))),2))", sep="")
+      }
+    }
+    if (fisher == 1) command <- paste(command, "\n  print(fisher.test(.Table))")
+    command <- paste(command, ' \n})', sep="")
+    doItAndPrint(command)
+    if (chisq == 1){
+      command.2 <- paste(command.2, "\nputRcmdr('.expected.counts', .Test$expected)\n  options(.warn)\n})")
+      justDoIt(command.2)
       warnText <- NULL
-      if (0 < (nlt1 <- sum(.Test$expected < 1))) warnText <- paste(nlt1,
-                                                                   gettextRcmdr("expected frequencies are less than 1"))
-      if (0 < (nlt5 <- sum(.Test$expected < 5))) warnText <- paste(warnText, "\n", nlt5,
-                                                                   gettextRcmdr(" expected frequencies are less than 5"), sep="")
+      expected <- getRcmdr(".expected.counts")
+      if (0 < (nlt1 <- sum(expected < 1))) warnText <- paste(nlt1,
+                                                             gettextRcmdr("expected frequencies are less than 1"))
+      if (0 < (nlt5 <- sum(expected < 5))) warnText <- paste(warnText, "\n", nlt5,
+                                                             gettextRcmdr(" expected frequencies are less than 5"), sep="")
       if (!is.null(warnText)) Message(message=warnText,
                                       type="warning")
-      if (chisqComp == 1) {
-        command <- "round(.Test$residuals^2, 2) # Chi-square Components"
-        doItAndPrint(command)
-        doItAndPrint("cat('Adjusted residuals\n');round((.Table-.Test$expected)/sqrt(.Test$expected*tcrossprod((1-apply(.Table,1,sum)/sum(.Table)),(1-apply(.Table,2,sum)/sum(.Table)))),2)")
-      }
-	  Library("vcd")
-      doItAndPrint("assocstats(.Table)")
-      logger("remove(.Test)")
-      remove(.Test, envir=.GlobalEnv)
     }
-    if (fisher == 1) doItAndPrint("fisher.test(.Table)")
-    logger("remove(.Table)")
-    remove(.Table, envir=.GlobalEnv)
     tkfocus(CommanderWindow())
   }
   OKCancelHelp(helpSubject="chisq.test")
@@ -941,6 +947,7 @@ enterTableNMBU <- function(){
 #############################
 ## Customized two-way table
 twoWayTableNMBU <- function(){
+  Library("vcd")
   initializeDialog(title=gettextRcmdr("Two-Way Table"))
   variablesFrame <- tkframe(top)
   .factors <- Factors()
@@ -967,42 +974,45 @@ twoWayTableNMBU <- function(){
     fisher <- tclvalue(fisherTestVariable)
     closeDialog()
     .activeDataSet <- ActiveDataSet()
-    command <- paste("table(data.frame(", row, "=rep(", .activeDataSet, "[,'", row, "'],", .activeDataSet, "[,'", count, "']),", column, "=rep(", .activeDataSet, "[,'", column, "'],", .activeDataSet, "[,'", count, "'])))", sep="")
-#    logger(paste(".Table <- ", command, sep=""))
-#    assign(".Table", justDoIt(command), envir=.GlobalEnv)
-    doItAndPrint(paste(".Table <- ", command, sep=""))
-    #        logger(paste(".Table[] <- ", command, sep=""))
-    #        assign(".Table[]", justDoIt(command), envir=.GlobalEnv)
-    doItAndPrint(".Table")
-    if (percents == "row") doItAndPrint("rowPercents(.Table) # Row Percentages")
-    if (percents == "column") doItAndPrint("colPercents(.Table) # Column Percentages")
-    if (percents == "total") doItAndPrint("totPercents(.Table) # Percentage of Total")
+    commandA <- paste("table(data.frame(", row, "=rep(", .activeDataSet, "[,'", row, "'],", .activeDataSet, "[,'", count, "']),", column, "=rep(", .activeDataSet, "[,'", column, "'],", .activeDataSet, "[,'", count, "'])))", sep="")
+    
+    command <- paste("local({\n  .Table <- ", commandA, '\n  cat("\\nFrequency table:\\n")\n  print(.Table)', sep="")
+    command.2 <- paste("local({\n  .warn <- options(warn=-1)\n  .Table <- ", commandA, sep="")
+    if (percents == "row") 
+      command <- paste(command, '\n  cat("\\nRow percentages:\\n")\n  print(rowPercents(.Table))',
+                       sep="")
+    else if (percents == "column") 
+      command <-  paste(command, '\n  cat("\\nColumn percentages:\\n")\n  print(colPercents(.Table))',
+                        sep="")
+    else if (percents == "total") 
+      command <- paste(command, '\n  cat("\\nTotal percentages:\\n")\n  print(totPercents(.Table))',
+                       sep="")
     if (chisq == 1) {
-      command <- "chisq.test(.Table, correct=FALSE)"
-#      logger(paste(".Test <- ", command, sep=""))
-#      assign(".Test", justDoIt(command), envir=.GlobalEnv)
-      doItAndPrint(paste(".Test <- ", command, sep=""))
-      if (expected == 1) doItAndPrint(".Test$expected # Expected Counts")
+      command <- paste(command, "\n  .Test <- chisq.test(.Table, correct=FALSE)", sep="")
+      command.2 <- paste(command.2, "\n  .Test <- chisq.test(.Table, correct=FALSE)", sep="")
+      command <- paste(command, "\n  print(assocstats(.Table))", sep="")
+      if (expected == 1)
+        command <- paste(command, '\n  cat("\\nExpected counts:\\n")\n  print(.Test$expected)', sep="")
+      if (chisqComp == 1) {
+        command <- paste(command, '\n  cat("\\nChi-square components:\\n")\n  print(round(.Test$residuals^2, 2))', sep="")
+        command <- paste(command, '\n  cat("\\nAdjusted residuals:\\n\")\n  ', "print(round((.Table-.Test$expected)/sqrt(.Test$expected*tcrossprod((1-apply(.Table,1,sum)/sum(.Table)),(1-apply(.Table,2,sum)/sum(.Table)))),2))", sep="")
+      }
+    }
+    if (fisher == 1) command <- paste(command, "\n  print(fisher.test(.Table))")
+    command <- paste(command, ' \n})', sep="")
+    doItAndPrint(command)
+    if (chisq == 1){
+      command.2 <- paste(command.2, "\nputRcmdr('.expected.counts', .Test$expected)\n  options(.warn)\n})")
+      justDoIt(command.2)
       warnText <- NULL
-      if (0 < (nlt1 <- sum(.Test$expected < 1))) warnText <- paste(nlt1,
-                                                                   gettextRcmdr("expected frequencies are less than 1"))
-      if (0 < (nlt5 <- sum(.Test$expected < 5))) warnText <- paste(warnText, "\n", nlt5,
-                                                                   gettextRcmdr(" expected frequencies are less than 5"), sep="")
+      expected <- getRcmdr(".expected.counts")
+      if (0 < (nlt1 <- sum(expected < 1))) warnText <- paste(nlt1,
+                                                             gettextRcmdr("expected frequencies are less than 1"))
+      if (0 < (nlt5 <- sum(expected < 5))) warnText <- paste(warnText, "\n", nlt5,
+                                                             gettextRcmdr(" expected frequencies are less than 5"), sep="")
       if (!is.null(warnText)) Message(message=warnText,
                                       type="warning")
-      if (chisqComp == 1) {
-        command <- "round(.Test$residuals^2, 2) # Chi-square Components"
-        doItAndPrint(command)
-        doItAndPrint("cat('Adjusted residuals\n');round((.Table-.Test$expected)/sqrt(.Test$expected*tcrossprod((1-apply(.Table,1,sum)/sum(.Table)),(1-apply(.Table,2,sum)/sum(.Table)))),2)")
-      }
-	  Library("vcd")
-	  doItAndPrint("assocstats(.Table)")
-      logger("remove(.Test)")
-      remove(.Test, envir=.GlobalEnv)
     }
-    if (fisher == 1) doItAndPrint("fisher.test(.Table)")
-    logger("remove(.Table)")
-    remove(.Table, envir=.GlobalEnv)
     tkfocus(CommanderWindow())
   }
   OKCancelHelp(helpSubject="xtabs")
@@ -1025,8 +1035,8 @@ twoWayTableNMBU <- function(){
 ################################
 # Analysis of variance
 linearModelNMBU <- function(){
-	defaults <- list(initial.contr="contr.sum", initial.output=c("1","0","0","0","0"), initial.subset = gettextRcmdr("<all valid cases>"))
-	dialog.values <- getDialog("linearModelNMBU", defaults)
+  defaults <- list(initial.contr="contr.sum", initial.output=c("1","0","0","0","0"), initial.subset = gettextRcmdr("<all valid cases>"))
+  dialog.values <- getDialog("linearModelNMBU", defaults)
   initializeDialog(title=gettextRcmdr("Linear model (regression/ANOVA) - specify model"))
   .activeModel <- ActiveModel()
   variables <- Variables()
@@ -1071,17 +1081,17 @@ linearModelNMBU <- function(){
   factorsButton <- tkbutton(groupsFrame, textvariable=.factorsLabel, command=onFactors, borderwidth=3)
   checkBoxes(frame="optionsFrame", boxes=c("reg","type1","type2","type3","typeR"), initialValues=dialog.values$initial.output, #c("1","0","0","0","0"),
              labels=gettextRcmdr(c("Regression","ANOVA 'type I test' (sequential)", "ANOVA 'type II test' (obeying marginality)", "ANOVA 'type III test' (ignoring marginality)", "ANOVA for regression")))
-	onRandom <- function() {
-		if (GrabFocus() && .Platform$OS.type != "windows") tkgrab.release(window)
-		if (as.numeric(R.Version()$major) >= 2) print(help("mixlm"))
-		else help("mixlm")
-	}
-	helpButton <- buttonRcmdr(optionsFrame, text=gettextRcmdr("Random effects help"), width="20", command=onRandom, borderwidth=3)
-	tkgrid(helpButton, sticky="w")
+  onRandom <- function() {
+    if (GrabFocus() && .Platform$OS.type != "windows") tkgrab.release(window)
+    if (as.numeric(R.Version()$major) >= 2) print(help("mixlm"))
+    else help("mixlm")
+  }
+  helpButton <- buttonRcmdr(optionsFrame, text=gettextRcmdr("Random effects help"), width="20", command=onRandom, borderwidth=3)
+  tkgrid(helpButton, sticky="w")
   
   currentModel <- if (!is.null(.activeModel))
-		class(get(.activeModel, envir=.GlobalEnv))[1] == "lm" || class(get(.activeModel, envir=.GlobalEnv))[1] == "mer"
-	else FALSE
+    class(get(.activeModel, envir=.GlobalEnv))[1] == "lm" || class(get(.activeModel, envir=.GlobalEnv))[1] == "mer"
+  else FALSE
   if (currentModel) {
     currentFields <- formulaFields2(get(.activeModel, envir=.GlobalEnv))
     if (currentFields$data != ActiveDataSet()) currentModel <- FALSE
@@ -1092,8 +1102,8 @@ linearModelNMBU <- function(){
     }
   }
   if (isTRUE(getRcmdr("reset.model"))) {
-	currentModel <- FALSE
-	putRcmdr("reset.model", FALSE)
+    currentModel <- FALSE
+    putRcmdr("reset.model", FALSE)
   }
   UpdateModelNumber()
   modelName <- tclVar(paste("LinearModel.", getRcmdr("modelNumber"), sep=""))
@@ -1107,10 +1117,10 @@ linearModelNMBU <- function(){
       return()
     }
     subset <- tclvalue(subsetVariable)
-	putDialog ("linearModelNMBU", list (initial.contr = tclvalue(contrVariable), initial.output = c(tclvalue(regVariable),
-			tclvalue(type1Variable), tclvalue(type2Variable), tclvalue(type3Variable), tclvalue(typeRVariable)), 
-			initial.subset = subset))
-	if (trim.blanks(subset) == gettextRcmdr("<all valid cases>") || trim.blanks(subset) == ""){
+    putDialog ("linearModelNMBU", list (initial.contr = tclvalue(contrVariable), initial.output = c(tclvalue(regVariable),
+                                                                                                    tclvalue(type1Variable), tclvalue(type2Variable), tclvalue(type3Variable), tclvalue(typeRVariable)), 
+                                        initial.subset = subset))
+    if (trim.blanks(subset) == gettextRcmdr("<all valid cases>") || trim.blanks(subset) == ""){
       subset <- ""
       putRcmdr("modelWithSubset", FALSE)
     }
@@ -1140,9 +1150,9 @@ linearModelNMBU <- function(){
         command <- "options(contrasts=c('contr.sum','contr.poly'))"
       } else {
         command <- "options(contrasts=c('contr.treatment','contr.poly'))"
-	  }
-	  if(options("contrasts")$contrasts[1] != tclvalue(contrVariable))
-		doItAndPrint(command)
+      }
+      if(options("contrasts")$contrasts[1] != tclvalue(contrVariable))
+        doItAndPrint(command)
     }
     .activeDataSet <- ActiveDataSet()
     if(!is.logical(chosen.factors)){
@@ -1159,20 +1169,20 @@ linearModelNMBU <- function(){
     
     formula1 <- paste("lm(", formula1, sep="")
     command <- paste(formula1, ", data=", .activeDataSet, subset, sep="")
-	if(tclvalue(contrVariable)==gettextRcmdr("reml"))
-		command <- paste(command, ", REML=TRUE)", sep="")
-	else
-    	command <- paste(command, ")", sep="")
-#	logger(paste(modelValue, " <- ", command, sep=""))
-#    assign(modelValue, justDoIt(command), envir=.GlobalEnv)
-	doItAndPrint(paste(modelValue, " <- ", command, sep=""))
+    if(tclvalue(contrVariable)==gettextRcmdr("reml"))
+      command <- paste(command, ", REML=TRUE)", sep="")
+    else
+      command <- paste(command, ")", sep="")
+    #	logger(paste(modelValue, " <- ", command, sep=""))
+    #    assign(modelValue, justDoIt(command), envir=.GlobalEnv)
+    doItAndPrint(paste(modelValue, " <- ", command, sep=""))
     activeModel(modelValue)
     if(tclvalue(regVariable)   == gettextRcmdr("1")) doItAndPrint(paste("summary(", modelValue, ")", sep=""))
     if(tclvalue(type1Variable) == gettextRcmdr("1")) doItAndPrint(paste("anova(", ActiveModel(), ")", sep=""))
     if(tclvalue(type2Variable) == gettextRcmdr("1")) doItAndPrint(paste("Anova(", ActiveModel(), ', type="II")', sep=""))
     if(tclvalue(type3Variable) == gettextRcmdr("1")) doItAndPrint(paste("Anova(", ActiveModel(), ', type="III")', sep=""))
     if(tclvalue(typeRVariable) == gettextRcmdr("1")) doItAndPrint(paste("anova_reg(", ActiveModel(), ')', sep=""))
-#    if(tclvalue(mixVariable)   == gettextRcmdr("1")) mixed.modelGUI()
+    #    if(tclvalue(mixVariable)   == gettextRcmdr("1")) mixed.modelGUI()
     tkfocus(CommanderWindow())
   }
   env <- environment()
@@ -1197,9 +1207,9 @@ linearModelNMBU <- function(){
   dialogSuffix(rows=7, columns=2)
 }
 resetLinearModelNMBU <- function(){
-	putRcmdr("reset.model", TRUE)
-	putDialog("linearModelNMBU", NULL)
-	linearModelNMBU()
+  putRcmdr("reset.model", TRUE)
+  putDialog("linearModelNMBU", NULL)
+  linearModelNMBU()
 }
 
 
@@ -1208,7 +1218,7 @@ resetLinearModelNMBU <- function(){
 generalizedLinearModelNMBU <- function(){
   defaults <- list(initial.contr = "contr.treatment", initial.weights="<none>", initial.offset="<none>")
   dialog.values <- getDialog("generalizedLinearModelNMBU", defaults)
-
+  
   families <- c("gaussian", "binomial", "poisson", "Gamma", "inverse.gaussian",
                 "quasibinomial", "quasipoisson")
   links <- c("identity", "inverse", "log", "logit", "probit",
@@ -1221,7 +1231,7 @@ generalizedLinearModelNMBU <- function(){
     TRUE,  TRUE,  TRUE,  FALSE, FALSE, FALSE, FALSE, TRUE,
     FALSE, FALSE, FALSE, TRUE,  TRUE,  TRUE,  FALSE, FALSE,
     TRUE,  FALSE, TRUE,  FALSE, FALSE, FALSE, TRUE,  FALSE),
-                           7, 8, byrow=TRUE)
+    7, 8, byrow=TRUE)
   rownames(availableLinks) <- families
   colnames(availableLinks) <- links
   canonicalLinks <- c("identity", "logit", "log", "inverse", "1/mu^2", "logit", "log")
@@ -1269,7 +1279,7 @@ generalizedLinearModelNMBU <- function(){
   
   groupsFrame <- tkframe(top)
   factorsButton <- tkbutton(groupsFrame, textvariable=.factorsLabel, command=onFactors, borderwidth=3)
-
+  
   currentModel <- if (!is.null(.activeModel))
     class(get(.activeModel, envir=.GlobalEnv))[1] == "glm"
   else FALSE
@@ -1277,10 +1287,10 @@ generalizedLinearModelNMBU <- function(){
     currentFields <- formulaFields(get(.activeModel, envir=.GlobalEnv), glm=TRUE)
     if (currentFields$data != ActiveDataSet()) currentModel <- FALSE
   }
-	if (isTRUE(getRcmdr("reset.model"))) {
-		currentModel <- FALSE
-		putRcmdr("reset.model", FALSE)
-	}
+  if (isTRUE(getRcmdr("reset.model"))) {
+    currentModel <- FALSE
+    putRcmdr("reset.model", FALSE)
+  }
   modelFormula3(.variables=variables, .factors=factors)
   UpdateModelNumber()
   modelName <- tclVar(paste("GLM.", getRcmdr("modelNumber"), sep=""))
@@ -1314,7 +1324,7 @@ generalizedLinearModelNMBU <- function(){
     tkselection.set(linkBox, which(canLink == availLinks) - 1)
   }
   onOK <- function(){
-	.activeDataSet <- ActiveDataSet()
+    .activeDataSet <- ActiveDataSet()
     check.empty <- gsub(" ", "", tclvalue(lhsVariable))
     if ("" == check.empty) {
       errorCondition(recall=generalizedLinearModelNMBU, model=TRUE, message=gettextRcmdr("Left-hand side of model empty."))
@@ -1338,13 +1348,13 @@ generalizedLinearModelNMBU <- function(){
         return()
       }
     }
-      if(tclvalue(contrVariable)==gettextRcmdr("contr.sum")){
-        command <- "options(contrasts=c('contr.sum','contr.poly'))"
-      } else {
-        command <- "options(contrasts=c('contr.treatment','contr.poly'))"
-	  }
-	  if(options("contrasts")$contrasts[1] != tclvalue(contrVariable))
-		doItAndPrint(command)
+    if(tclvalue(contrVariable)==gettextRcmdr("contr.sum")){
+      command <- "options(contrasts=c('contr.sum','contr.poly'))"
+    } else {
+      command <- "options(contrasts=c('contr.treatment','contr.poly'))"
+    }
+    if(options("contrasts")$contrasts[1] != tclvalue(contrVariable))
+      doItAndPrint(command)
     if(!is.logical(chosen.factors)){
       variables <- Variables()
       command <- paste(.activeDataSet, ".tmp <- data.frame(", paste(variables[!is.element(variables,chosen.factors)], "=", ActiveDataSet(), "$", variables[!is.element(variables,chosen.factors)], ", ", sep="", collapse=""), paste(variables[is.element(variables,chosen.factors)], "=factor(", ActiveDataSet(), "$", variables[is.element(variables,chosen.factors)], "), ", sep="", collapse=""), sep="")
@@ -1360,8 +1370,8 @@ generalizedLinearModelNMBU <- function(){
     subset <- tclvalue(subsetVariable)
     weightsValue <- tclvalue(weightsName)
     offsetValue <- tclvalue(offsetName)
-	putDialog ("generalizedLinearModelNMBU", list (initial.contr = tclvalue(contrVariable), initial.offset = offsetValue,
-				initial.weights = weightsValue))
+    putDialog ("generalizedLinearModelNMBU", list (initial.contr = tclvalue(contrVariable), initial.offset = offsetValue,
+                                                   initial.weights = weightsValue))
     closeDialog()
     if (trim.blanks(subset) == gettextRcmdr("<all valid cases>") || trim.blanks(subset) == ""){
       subset <- ""
@@ -1373,23 +1383,23 @@ generalizedLinearModelNMBU <- function(){
     }
     command <- paste("glm(", formula, ifelse(offsetValue=="<none>","",paste(" + offset(",offsetValue,")",sep="")), ", family=", family, "(", link,
                      "),", ifelse(weightsValue=="<none>","",paste(" weights=",weightsValue,"," ,sep="")), " data=", ActiveDataSet(), subset, ")", sep="")
-#    logger(paste(modelValue, " <- ", command, sep=""))
-#    assign(modelValue, justDoIt(command), envir=.GlobalEnv)
+    #    logger(paste(modelValue, " <- ", command, sep=""))
+    #    assign(modelValue, justDoIt(command), envir=.GlobalEnv)
     doItAndPrint(paste(modelValue, " <- ", command, sep=""))
     doItAndPrint(paste("summary(", modelValue, ")", sep=""))
     activeModel(modelValue)
-	model.class <- eval(parse(text=paste("class(",modelValue,")",sep="")))
-	if(model.class[1]=="glmerMod" || model.class[1]=="lmerMod"){
-		doItAndPrint(paste("Anova(", modelValue, ",test='Chisq',type=3)", sep=""))
-	} else {
-		doItAndPrint(paste("Anova(", modelValue, ",test='LR',type=3)", sep=""))
-	}
+    model.class <- eval(parse(text=paste("class(",modelValue,")",sep="")))
+    if(model.class[1]=="glmerMod" || model.class[1]=="lmerMod"){
+      doItAndPrint(paste("Anova(", modelValue, ",test='Chisq',type=3)", sep=""))
+    } else {
+      doItAndPrint(paste("Anova(", modelValue, ",test='LR',type=3)", sep=""))
+    }
     doItAndPrint(paste("logLik(", modelValue, ")",sep=""))
     tkfocus(CommanderWindow())
   }
   env <- environment()
   tkgrid(labelRcmdr(groupsFrame, text="    "), factorsButton, sticky="w")
-
+  
   OKCancelHelp(helpSubject="generalizedLinearModel", model=TRUE, reset="resetGLMNMBU")
   helpButton <- buttonRcmdr(buttonsFrame, text="Help", width="12", command=onHelp)
   tkgrid(labelRcmdr(modelFrame, text=gettextRcmdr("Enter name for model:")), model, sticky="w")
@@ -1430,9 +1440,9 @@ generalizedLinearModelNMBU <- function(){
   dialogSuffix(rows=10, columns=2, focus=lhsEntry, preventDoubleClick=TRUE)
 }
 resetGLMNMBU <- function(){
-	putRcmdr("reset.model", TRUE)
-	putDialog("generalizedLinearModelNMBU", NULL)
-	generalizedLinearModelNMBU()
+  putRcmdr("reset.model", TRUE)
+  putDialog("generalizedLinearModelNMBU", NULL)
+  generalizedLinearModelNMBU()
 }
 
 
@@ -1497,7 +1507,7 @@ multinomialLogitModelNMBU <- function(){
       #        if (!is.factor(eval(parse(text=tclvalue(lhsVariable)), envir=eval(parse(text=.activeDataSet), envir=.GlobalEnv)))){
       errorCondition(recall=multinomialLogitModelNMBU, message=gettextRcmdr("Response variable must be a factor"))
       return()
-      }
+    }
     if (baseValue!="" && !is.element(baseValue, justDoIt(paste("levels(", ActiveDataSet(), "$", tclvalue(lhsVariable), ")", sep="")))){
       errorCondition(recall=multinomialLogitModelNMBU, message=gettextRcmdr("'Base level' must be a level used in the response."))
       return()
@@ -1519,8 +1529,8 @@ multinomialLogitModelNMBU <- function(){
     formula <- paste(tclvalue(lhsVariable), tclvalue(rhsVariable), sep=" ~ ")
     command <- paste("multinom(", formula,
                      ",", ifelse(weightsValue=="<none>","",paste(" weights=",weightsValue,"," ,sep="")), " data=", .activeDataSet, subset, ", trace=FALSE)", sep="")
-#    logger(paste(modelValue, " <- ", command, sep=""))
-#    assign(modelValue, justDoIt(command), envir=.GlobalEnv)
+    #    logger(paste(modelValue, " <- ", command, sep=""))
+    #    assign(modelValue, justDoIt(command), envir=.GlobalEnv)
     doItAndPrint(paste(modelValue, " <- ", command, sep=""))
     doItAndPrint(paste("summaryMultinom(", modelValue, ")", sep=""))
     activeModel(modelValue)
@@ -1529,7 +1539,7 @@ multinomialLogitModelNMBU <- function(){
       doItAndPrint(command)
     }
     tkfocus(CommanderWindow())
-    }
+  }
   OKCancelHelp(helpSubject="multinom", model=TRUE)
   tkgrid(labelRcmdr(modelFrame, text=gettextRcmdr("Enter name for model:")), model, sticky="w")
   tkgrid(modelFrame, sticky="w", row=1, column=1, columnspan=2)
@@ -1545,7 +1555,7 @@ multinomialLogitModelNMBU <- function(){
   tkgrid(weightsFrame, sticky="w", row=6, column=2, columnspan=1)
   tkgrid(buttonsFrame, sticky="w", row=7, column=1, columnspan=2)
   dialogSuffix(rows=7, columns=2, focus=lhsEntry, preventDoubleClick=TRUE)
-  }
+}
 
 
 ################################
@@ -1608,7 +1618,7 @@ ordinalRegressionModelNMBU <- function(){
       #        if (!is.factor(eval(parse(text=tclvalue(lhsVariable)), envir=eval(parse(text=.activeDataSet), envir=.GlobalEnv)))){
       errorCondition(recall=ordinalRegressionModelNMBU, message=gettextRcmdr("Response variable must be a factor"))
       return()
-      }
+    }
     if (is.element(modelValue, listProportionalOddsModels())) {
       if ("no" == tclvalue(checkReplace(modelValue, type=gettextRcmdr("Model")))){
         UpdateModelNumber(-1)
@@ -1619,13 +1629,13 @@ ordinalRegressionModelNMBU <- function(){
     formula <- paste(tclvalue(lhsVariable), tclvalue(rhsVariable), sep=" ~ ")
     command <- paste("polr(", formula, ', method="', tclvalue(modelTypeVariable),
                      '",', ifelse(weightsValue=='<none>','',paste(' weights=',weightsValue,',' ,sep='')), ' data=', .activeDataSet, subset, ", Hess=TRUE)", sep="")
-#    logger(paste(modelValue, " <- ", command, sep=""))
-#    assign(modelValue, justDoIt(command), envir=.GlobalEnv)
+    #    logger(paste(modelValue, " <- ", command, sep=""))
+    #    assign(modelValue, justDoIt(command), envir=.GlobalEnv)
     doItAndPrint(paste(modelValue, " <- ", command, sep=""))
     doItAndPrint(paste("summaryOrdinal(", modelValue, ")", sep=""))
     activeModel(modelValue)
     tkfocus(CommanderWindow())
-    }
+  }
   OKCancelHelp(helpSubject="polr", model=TRUE)
   tkgrid(labelRcmdr(modelFrame, text=gettextRcmdr("Enter name for model:")), model, sticky="w")
   tkgrid(modelFrame, sticky="w", row=1, column=1, columnspan=2)
@@ -1640,7 +1650,7 @@ ordinalRegressionModelNMBU <- function(){
   tkgrid(weightsFrame, sticky="w", row=6, column=2, columnspan=1)
   tkgrid(buttonsFrame, sticky="w", row=7, column=1, columnspan=2)
   dialogSuffix(rows=7, columns=2, focus=lhsEntry, preventDoubleClick=TRUE)
-  }
+}
 
 ################################
 # Customized numerical summaries
@@ -1693,7 +1703,7 @@ numericalSummariesNMBU <- function(){
       initial.quantiles.variable=quantsVar, initial.quantiles=quants,
       initial.skewness=skewnessVar, initial.kurtosis=kurtosisVar, initial.type=typeVar,
       initial.group=if (.groups != FALSE) .groups else NULL
-      ))		
+    ))		
     if (length(x) == 0){
       errorCondition(recall=numericalSummariesNMBU, message=gettextRcmdr("You must select a variable."))
       return()
@@ -2636,16 +2646,16 @@ simplex.analysis <- function(){
     if(linear==gettextRcmdr("linear")){
       formula1 <- paste("lm(", paste("formula(",y," ~ ",x1," + ",x2," + ",x3, " -1)", sep=""), sep="")
       command <- paste(formula1, ", data=", .activeDataSet,")", sep="")
-#      logger(paste(modelValue, " <- ", command, sep=""))
-#      assign(modelValue, justDoIt(command), envir=.GlobalEnv)
+      #      logger(paste(modelValue, " <- ", command, sep=""))
+      #      assign(modelValue, justDoIt(command), envir=.GlobalEnv)
       doItAndPrint(paste(modelValue, " <- ", command, sep=""))
       activeModel(modelValue)
       doItAndPrint(paste("Anova(", modelValue, ", type='II')", sep=""))
     } else {
       formula1 <- paste("lm(", paste("formula(",y," ~ (",x1," + ",x2," + ",x3, ")^2 -1)", sep=""), sep="")
       command <- paste(formula1, ", data=", .activeDataSet,")", sep="")
-#      logger(paste(modelValue, " <- ", command, sep=""))
-#      assign(modelValue, justDoIt(command), envir=.GlobalEnv)
+      #      logger(paste(modelValue, " <- ", command, sep=""))
+      #      assign(modelValue, justDoIt(command), envir=.GlobalEnv)
       doItAndPrint(paste(modelValue, " <- ", command, sep=""))
       activeModel(modelValue)
       doItAndPrint(paste("Anova(", modelValue, ", type='II')", sep=""))
@@ -2662,7 +2672,7 @@ simplex.analysis <- function(){
   tkgrid(getFrame(yBox), sticky="nw")
   tkgrid(variablesFrame, sticky="nw", row=2, column=1, columnspan=2)
   radioButtonsNMBU(formatFrame,name="linear", buttons=c("linear", "quadratic"), values=c("linear", "quadratic"), initialValue = "linear",
-                  labels=gettextRcmdr(c("Linear model", "Quadratic model")))
+                   labels=gettextRcmdr(c("Linear model", "Quadratic model")))
   tkgrid(formatFrame, row=3, column=1, columnspan=1, rowspan=1, sticky="w")
   checkBoxes(frame="plotFrame", boxes=c("plot"), initialValues=c("0"), labels=gettextRcmdr(c("Plot responce surface")))
   tkgrid(plotFrame, row=4, column=1, columnspan=1, rowspan=1, sticky="w")
@@ -2688,7 +2698,7 @@ RelComp <- function(){
   
   checkBoxes(frame="optionsFrame", boxes=c("center", "scale"), initialValues=c("1", "0"),
              labels=gettextRcmdr(c("Center predictors", "Scale predictors")))
-
+  
   onOK <- function(){ # Actions to perform
     x <- getSelection(xBox)
     nvar <- length(x)
@@ -2755,8 +2765,8 @@ tally.GUI <- function(){
       errorCondition(recall=tally.GUI, message=gettextRcmdr("Exactly one variable must be chosen"))
       return()
     }
-	command <- paste("tally(",ActiveDataSet(), "$", x,")", sep="")
-	doItAndPrint(command)
+    command <- paste("tally(",ActiveDataSet(), "$", x,")", sep="")
+    doItAndPrint(command)
     tkfocus(CommanderWindow())
   }
   # Set up GUI
@@ -2772,32 +2782,32 @@ tally.GUI <- function(){
 powerTtest <- function(){
   initializeDialog(title=gettextRcmdr("Power calculations for one and two sample t tests"))
   onOK <- function(){ # Actions to perform
-	nVal <- tclvalue(nLevel)
-	deltaVal <- tclvalue(deltaLevel)
-	sdVal <- tclvalue(sdLevel)
-	sigVal <- tclvalue(sigLevel)
-	powVal <- tclvalue(powLevel)
-	nBlank <- 0
-	if(trim.blanks(nVal) != gettextRcmdr("")){
-		nBlank <- nBlank + 1
-	} else {nVal <- "NULL"}
-	if(trim.blanks(deltaVal) != gettextRcmdr("")){
-		nBlank <- nBlank + 1
-	} else {deltaVal <- "NULL"}
-	if(trim.blanks(sdVal) != gettextRcmdr("")){
-		nBlank <- nBlank + 1
-	} else {sdVal <- "NULL"}
-	if(trim.blanks(sigVal) != gettextRcmdr("")){
-		nBlank <- nBlank + 1
-	} else {sigVal <- "NULL"}
-	if(trim.blanks(powVal) != gettextRcmdr("")){
-		nBlank <- nBlank + 1
-		pow <- as.numeric(powVal)
-		if(pow<=0 || pow>=1){
-		  errorCondition(recall=powerTtest, message=gettextRcmdr("Power must be between 0 and 1 if supplied."))
-		  return()
-		}
-	} else {powVal <- "NULL"}
+    nVal <- tclvalue(nLevel)
+    deltaVal <- tclvalue(deltaLevel)
+    sdVal <- tclvalue(sdLevel)
+    sigVal <- tclvalue(sigLevel)
+    powVal <- tclvalue(powLevel)
+    nBlank <- 0
+    if(trim.blanks(nVal) != gettextRcmdr("")){
+      nBlank <- nBlank + 1
+    } else {nVal <- "NULL"}
+    if(trim.blanks(deltaVal) != gettextRcmdr("")){
+      nBlank <- nBlank + 1
+    } else {deltaVal <- "NULL"}
+    if(trim.blanks(sdVal) != gettextRcmdr("")){
+      nBlank <- nBlank + 1
+    } else {sdVal <- "NULL"}
+    if(trim.blanks(sigVal) != gettextRcmdr("")){
+      nBlank <- nBlank + 1
+    } else {sigVal <- "NULL"}
+    if(trim.blanks(powVal) != gettextRcmdr("")){
+      nBlank <- nBlank + 1
+      pow <- as.numeric(powVal)
+      if(pow<=0 || pow>=1){
+        errorCondition(recall=powerTtest, message=gettextRcmdr("Power must be between 0 and 1 if supplied."))
+        return()
+      }
+    } else {powVal <- "NULL"}
     if(nBlank != 4){
       errorCondition(recall=powerTtest, message=gettextRcmdr("Exactly one field must be left empty."))
       return()
@@ -2805,52 +2815,52 @@ powerTtest <- function(){
     type <- as.character(tclvalue(typeVariable))
     alternative <- as.character(tclvalue(alternativeVariable))
     closeDialog()
-	command <- paste("power.t.test(n = ", nVal, ", delta = ", deltaVal, ", sd = ", sdVal, ", sig.level = ", sigVal, ", power = ", powVal, ", type = '", type, "', alternative = '", alternative, "')", sep="")
+    command <- paste("power.t.test(n = ", nVal, ", delta = ", deltaVal, ", sd = ", sdVal, ", sig.level = ", sigVal, ", power = ", powVal, ", type = '", type, "', alternative = '", alternative, "')", sep="")
     doItAndPrint(command)
     #assign(".Table", justDoIt(command), envir=.GlobalEnv)
     tkfocus(CommanderWindow())
   }
   # Set up GUI
-    nFrame <- tkframe(top)
-	nLevel <- tclVar("")
-	nField <- ttkentry(nFrame, width="6", textvariable=nLevel)
-	deltaFrame <- tkframe(top)
-	deltaLevel <- tclVar("")
-	deltaField <- ttkentry(deltaFrame, width="6", textvariable=deltaLevel)
-	sdFrame <- tkframe(top)
-	sdLevel <- tclVar("")
-	sdField <- ttkentry(sdFrame, width="6", textvariable=sdLevel)
-	sigFrame <- tkframe(top)
-	sigLevel <- tclVar("0.05")
-	sigField <- ttkentry(sigFrame, width="6", textvariable=sigLevel)
-	powFrame <- tkframe(top)
-	powLevel <- tclVar("")
-	powField <- ttkentry(powFrame, width="6", textvariable=powLevel)
-	
-	tkgrid(labelRcmdr(nFrame, text=gettextRcmdr("# of samples:"), fg="blue"), sticky="nw")
-	tkgrid(nField, sticky="nw")
-	tkgrid(labelRcmdr(deltaFrame, text=gettextRcmdr("True difference:"), fg="blue"), sticky="nw")
-	tkgrid(deltaField, sticky="nw")
-	tkgrid(labelRcmdr(sdFrame, text=gettextRcmdr("Standard deviation:"), fg="blue"), sticky="nw")
-	tkgrid(sdField, sticky="nw")
-	tkgrid(labelRcmdr(sigFrame, text=gettextRcmdr("Significance level:"), fg="blue"), sticky="nw")
-	tkgrid(sigField, sticky="nw")
-	tkgrid(labelRcmdr(powFrame, text=gettextRcmdr("Power:"), fg="blue"), sticky="nw")
-	tkgrid(powField, sticky="nw")
-	
-	tkgrid(nFrame, sticky="nw", row=1, column=1, columnspan=1)
-	tkgrid(deltaFrame, sticky="nw", row=1, column=2, columnspan=1)
-	tkgrid(sdFrame, sticky="nw", row=1, column=3, columnspan=1)
-	tkgrid(sigFrame, sticky="nw", row=2, column=1, columnspan=1)
-	tkgrid(powFrame, sticky="nw", row=2, column=2, columnspan=1)
-
-	radioButtons(top, name="type", buttons=c("twosample", "onesample", "Paired"), values=c("two.sample", "one.sample", "paired"),
+  nFrame <- tkframe(top)
+  nLevel <- tclVar("")
+  nField <- ttkentry(nFrame, width="6", textvariable=nLevel)
+  deltaFrame <- tkframe(top)
+  deltaLevel <- tclVar("")
+  deltaField <- ttkentry(deltaFrame, width="6", textvariable=deltaLevel)
+  sdFrame <- tkframe(top)
+  sdLevel <- tclVar("")
+  sdField <- ttkentry(sdFrame, width="6", textvariable=sdLevel)
+  sigFrame <- tkframe(top)
+  sigLevel <- tclVar("0.05")
+  sigField <- ttkentry(sigFrame, width="6", textvariable=sigLevel)
+  powFrame <- tkframe(top)
+  powLevel <- tclVar("")
+  powField <- ttkentry(powFrame, width="6", textvariable=powLevel)
+  
+  tkgrid(labelRcmdr(nFrame, text=gettextRcmdr("# of samples:"), fg="blue"), sticky="nw")
+  tkgrid(nField, sticky="nw")
+  tkgrid(labelRcmdr(deltaFrame, text=gettextRcmdr("True difference:"), fg="blue"), sticky="nw")
+  tkgrid(deltaField, sticky="nw")
+  tkgrid(labelRcmdr(sdFrame, text=gettextRcmdr("Standard deviation:"), fg="blue"), sticky="nw")
+  tkgrid(sdField, sticky="nw")
+  tkgrid(labelRcmdr(sigFrame, text=gettextRcmdr("Significance level:"), fg="blue"), sticky="nw")
+  tkgrid(sigField, sticky="nw")
+  tkgrid(labelRcmdr(powFrame, text=gettextRcmdr("Power:"), fg="blue"), sticky="nw")
+  tkgrid(powField, sticky="nw")
+  
+  tkgrid(nFrame, sticky="nw", row=1, column=1, columnspan=1)
+  tkgrid(deltaFrame, sticky="nw", row=1, column=2, columnspan=1)
+  tkgrid(sdFrame, sticky="nw", row=1, column=3, columnspan=1)
+  tkgrid(sigFrame, sticky="nw", row=2, column=1, columnspan=1)
+  tkgrid(powFrame, sticky="nw", row=2, column=2, columnspan=1)
+  
+  radioButtons(top, name="type", buttons=c("twosample", "onesample", "Paired"), values=c("two.sample", "one.sample", "paired"),
                labels=gettextRcmdr(c("Two sample", "One sample", "Paired")), title=gettextRcmdr("Type of t test"))
-	radioButtons(top, name="alternative", buttons=c("twosided", "onesided"), values=c("two.sided", "one.sided"),
+  radioButtons(top, name="alternative", buttons=c("twosided", "onesided"), values=c("two.sided", "one.sided"),
                labels=gettextRcmdr(c("Two-sided", "One-sided")), title=gettextRcmdr("Alternative"))
-    tkgrid(typeFrame, sticky="nw", row=3, column=1, columnspan=1)
-    tkgrid(alternativeFrame, sticky="nw", row=3, column=2, columnspan=2)
-
+  tkgrid(typeFrame, sticky="nw", row=3, column=1, columnspan=1)
+  tkgrid(alternativeFrame, sticky="nw", row=3, column=2, columnspan=2)
+  
   OKCancelHelp(helpSubject="power.t.test")
   tkgrid(buttonsFrame, sticky="w", row=4, column=1, columnspan=3)
   dialogSuffix(rows=4, columns=2)

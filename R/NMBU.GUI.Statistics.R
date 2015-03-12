@@ -451,13 +451,13 @@ principalComponentsStat <- function(){
     addPC <- tclvalue(addPCVariable)
     closeDialog()
     if (2 > length(x)) {
-      errorCondition(recall=principalComponents, message=gettextRcmdr("Fewer than 2 variables selected."))
+      errorCondition(recall=principalComponentsStat, message=gettextRcmdr("Fewer than 2 variables selected."))
       return()
     }
     modelValue <- trim.blanks(tclvalue(modelName))
     if (!is.valid.name(modelValue)){
       UpdateModelNumber(-1)
-      errorCondition(recall=principalComponents, message=sprintf(gettextRcmdr('"%s" is not a valid name.'), modelValue))
+      errorCondition(recall=principalComponentsStat, message=sprintf(gettextRcmdr('"%s" is not a valid name.'), modelValue))
       return()
     }
     if (is.element(modelValue, listLinearModels())) {
@@ -471,15 +471,15 @@ principalComponentsStat <- function(){
     else paste(", subset=", subset, sep="")
     correlations <- if (correlations == "1") "TRUE" else "FALSE"
     .activeDataSet <- ActiveDataSet()
-    doItAndPrint(paste("\n  ", modelValue, " <- princomp(~", paste(x, collapse = "+"), 
-                       ", cor=", correlations, ", data=", .activeDataSet, 
+    doItAndPrint(paste("\n  ", modelValue, " <- prcomp(~", paste(x, collapse = "+"), 
+                       ", scale.=", correlations, ", data=", .activeDataSet, 
                        subset, ")", sep = ""))
     cmds <- character(8)
     cmds[1] <- "local({"
     cmds[2] <- '  cat("\\nComponent loadings:\\n")'
-    cmds[3] <- paste("  print(unclass(loadings(", modelValue, ")))", sep="")
+    cmds[3] <- paste("  print(", modelValue, "$rotation)", sep="")
     cmds[4] <- '  cat("\\nComponent variances:\\n")'
-    cmds[5] <- paste("  print(", modelValue, "$sd^2)", sep="")
+    cmds[5] <- paste("  print(", modelValue, "$sdev^2)", sep="")
     cmds[6] <- '  cat("\\n")'
     cmds[7] <- paste("  print(summary(", modelValue, "))", sep="")
     cmds[8] <- if (screeplot == "1") paste("  screeplot(", modelValue, ")\n", sep="") else ""
@@ -512,7 +512,7 @@ principalComponentsStat <- function(){
           if (is.element(var, Variables())) {
             if ("no" == tclvalue(checkReplace(var))) next
           }
-          commands[ncomponents - i + 1] <- paste("    PC", i, " <- ", modelValue, "$scores[,", 
+          commands[ncomponents - i + 1] <- paste("    PC", i, " <- ", modelValue, "$x[,", 
                                                  i, "]", sep = "")
         }
         suffix <- "  })"
@@ -737,7 +737,7 @@ hierarchicalClusterVariable <- function(){
     dendro <- tclvalue(plotDendro)
     solution <- trim.blanks(tclvalue(solutionName))
     if (length(x)==0) {
-      errorCondition(recall=hierarchicalCluster, 
+      errorCondition(recall=hierarchicalClusterVariable, 
                      message=gettextRcmdr("No variables selected."))
       return()
     }
@@ -1130,12 +1130,12 @@ linearModelNMBU <- function(){
     }
     check.empty <- gsub(" ", "", tclvalue(lhsVariable))
     if ("" == check.empty) {
-      errorCondition(recall=linearModelANOVA, message=gettextRcmdr("Left-hand side of model empty."), model=TRUE)
+      errorCondition(recall=linearModelNMBU, message=gettextRcmdr("Left-hand side of model empty."), model=TRUE)
       return()
     }
     check.empty <- gsub(" ", "", tclvalue(rhsVariable))
     if ("" == check.empty) {
-      errorCondition(recall=linearModelANOVA, message=gettextRcmdr("Right-hand side of model empty."), model=TRUE)
+      errorCondition(recall=linearModelNMBU, message=gettextRcmdr("Right-hand side of model empty."), model=TRUE)
       return()
     }
     if (is.element(modelValue, listLinearModels())) {
@@ -1779,11 +1779,11 @@ oneWayAnovaNMBU <- function(){
     response <- getSelection(responseBox)
     closeDialog()
     if (length(group) == 0){
-      errorCondition(recall=oneWayAnova, message=gettextRcmdr("You must select a groups factor."))
+      errorCondition(recall=oneWayAnovaNMBU, message=gettextRcmdr("You must select a groups factor."))
       return()
     }
     if (length(response) == 0){
-      errorCondition(recall=oneWayAnova, message=gettextRcmdr("You must select a response variable."))
+      errorCondition(recall=oneWayAnovaNMBU, message=gettextRcmdr("You must select a response variable."))
       return()
     }
     .activeDataSet <- ActiveDataSet()
@@ -1843,7 +1843,7 @@ multiWayAnovaNMBU <- function(){
     modelValue <- trim.blanks(tclvalue(modelName))
     if (!is.valid.name(modelValue)){
       UpdateModelNumber(-1)
-      errorCondition(recall=multiWayAnova, message=sprintf(gettextRcmdr('"%s" is not a valid name.'), modelValue))
+      errorCondition(recall=multiWayAnovaNMBU, message=sprintf(gettextRcmdr('"%s" is not a valid name.'), modelValue))
       return()
     }
     if (is.element(modelValue, listAOVModels())) {
@@ -1859,11 +1859,11 @@ multiWayAnovaNMBU <- function(){
     response <- getSelection(responseBox)
     closeDialog()
     if (length(groups) == 0){
-      errorCondition(recall=multiWayAnova, message=gettextRcmdr("You must select at least one factor."))
+      errorCondition(recall=multiWayAnovaNMBU, message=gettextRcmdr("You must select at least one factor."))
       return()
     }
     if (length(response) == 0){
-      errorCondition(recall=multiWayAnova, message=gettextRcmdr("You must select a response variable."))
+      errorCondition(recall=multiWayAnovaNMBU, message=gettextRcmdr("You must select a response variable."))
       return()
     }
     .activeDataSet <- ActiveDataSet()
@@ -2028,12 +2028,12 @@ independentSamplesTTestNMBU <- function(){
   onOK <- function(){
     group <- getSelection(groupBox)
     if (length(group) == 0) {
-      errorCondition(recall=independentSamplesTTest, message=gettextRcmdr("You must select a groups variable."))
+      errorCondition(recall=independentSamplesTTestNMBU, message=gettextRcmdr("You must select a groups variable."))
       return()
     }
     response <- getSelection(responseBox)
     if (length(response) == 0) {
-      errorCondition(recall=independentSamplesTTest, message=gettextRcmdr("You must select a response variable."))
+      errorCondition(recall=independentSamplesTTestNMBU, message=gettextRcmdr("You must select a response variable."))
       return()
     }
     alternative <- as.character(tclvalue(alternativeVariable))
@@ -2084,11 +2084,11 @@ pairedTTestNMBU <- function(){
     x <- getSelection(xBox)
     y <- getSelection(yBox)
     if (length(x) == 0 | length(y) == 0){
-      errorCondition(recall=pairedTTest, message=gettextRcmdr("You must select two variables."))
+      errorCondition(recall=pairedTTestNMBU, message=gettextRcmdr("You must select two variables."))
       return()
     }
     if (x == y){
-      errorCondition(recall=pairedTTest, message=gettextRcmdr("Variables must be different."))
+      errorCondition(recall=pairedTTestNMBU, message=gettextRcmdr("Variables must be different."))
       return()
     }
     alternative <- as.character(tclvalue(alternativeVariable))
@@ -2130,7 +2130,7 @@ singleSampleTTestNMBU <- function(){
   onOK <- function(){
     x <- getSelection(xBox)
     if (length(x) == 0){
-      errorCondition(recall=singleSampleTTest, message=gettextRcmdr("You must select a variable."))
+      errorCondition(recall=singleSampleTTestNMBU, message=gettextRcmdr("You must select a variable."))
       return()
     }
     alternative <- as.character(tclvalue(alternativeVariable))
@@ -2188,7 +2188,7 @@ twoSamplesZTestSum <- function(){
     tkfocus(CommanderWindow())
   }
   # Set up GUI
-  OKCancelHelp(helpSubject="t_test")
+  OKCancelHelp(helpSubject="z_test")
   
   grFrame <- tkframe(top);
   tkgrid(labelRcmdr(grFrame, text=gettextRcmdr(""), fg="blue"),sticky="w")
@@ -2255,7 +2255,7 @@ oneSamplesZTestSum <- function(){
     tkfocus(CommanderWindow())
   }
   # Set up GUI
-  OKCancelHelp(helpSubject="t_test")
+  OKCancelHelp(helpSubject="z_test")
   
   grFrame <- tkframe(top);
   tkgrid(labelRcmdr(grFrame, text=gettextRcmdr(""), fg="blue"),sticky="w")
@@ -2308,18 +2308,18 @@ independentSamplesZTestNMBU <- function(){
     sd1 <- as.character(tclvalue(sd1Level))
     sd2 <- as.character(tclvalue(sd2Level))
     if(sd1==gettextRcmdr("") || sd1==gettextRcmdr("")){
-      errorCondition(recall=independentSamplesZTest, message=gettextRcmdr("You must specify both standard deviations."))
+      errorCondition(recall=independentSamplesZTestNMBU, message=gettextRcmdr("You must specify both standard deviations."))
     }
     sd1 <- as.numeric(sd1)
     sd2 <- as.numeric(sd2)
     group <- getSelection(groupBox)
     if (length(group) == 0) {
-      errorCondition(recall=independentSamplesZTest, message=gettextRcmdr("You must select a groups variable."))
+      errorCondition(recall=independentSamplesZTestNMBU, message=gettextRcmdr("You must select a groups variable."))
       return()
     }
     response <- getSelection(responseBox)
     if (length(response) == 0) {
-      errorCondition(recall=independentSamplesZTest, message=gettextRcmdr("You must select a response variable."))
+      errorCondition(recall=independentSamplesZTestNMBU, message=gettextRcmdr("You must select a response variable."))
       return()
     }
     alternative <- as.character(tclvalue(alternativeVariable))
@@ -2327,7 +2327,7 @@ independentSamplesZTestNMBU <- function(){
     variances <- as.character(tclvalue(variancesVariable))
     mu0 <- as.character(tclvalue(mu0Level))
     closeDialog()
-    doItAndPrint(paste("z.test(", response, "~", group,
+    doItAndPrint(paste("z_test(", response, "~", group,
                        ", alternative='", alternative, "', mu=", mu0, ", conf.level=", level,
                        ", var.equal=", variances,
                        ", data=", ActiveDataSet(), ", sds=c(", sd1, ",", sd2, "))", sep=""))
@@ -2378,15 +2378,15 @@ pairedZTestNMBU <- function(){
     sd1 <- as.character(tclvalue(sd1Level))
     z.test <- FALSE
     if(sd1==gettextRcmdr("")){
-      errorCondition(recall=pairedZTest, message=gettextRcmdr("You must specify a standard deviation."))
+      errorCondition(recall=pairedZTestNMBU, message=gettextRcmdr("You must specify a standard deviation."))
     }
     sd1 <- as.numeric(sd1)
     if (length(x) == 0 | length(y) == 0){
-      errorCondition(recall=pairedZTest, message=gettextRcmdr("You must select two variables."))
+      errorCondition(recall=pairedZTestNMBU, message=gettextRcmdr("You must select two variables."))
       return()
     }
     if (x == y){
-      errorCondition(recall=pairedZTest, message=gettextRcmdr("Variables must be different."))
+      errorCondition(recall=pairedZTestNMBU, message=gettextRcmdr("Variables must be different."))
       return()
     }
     alternative <- as.character(tclvalue(alternativeVariable))
@@ -2394,7 +2394,7 @@ pairedZTestNMBU <- function(){
     mu <- tclvalue(muVariable)
     closeDialog()
     .activeDataSet <- ActiveDataSet()
-    doItAndPrint(paste("z.test(", .activeDataSet, "$", x, ", ",
+    doItAndPrint(paste("z_test(", .activeDataSet, "$", x, ", ",
                        .activeDataSet, "$", y,
                        ", alternative='", alternative, "', conf.level=", level,
                        ", paired=TRUE, sds=", sd1, ")", sep=""))
@@ -2434,24 +2434,24 @@ singleSampleZTestNMBU <- function(){
     x <- getSelection(xBox)
     sd1 <- as.character(tclvalue(sd1Level))
     if(sd1==gettextRcmdr("")){
-      errorCondition(recall=singleSampleZTest, message=gettextRcmdr("You must specify a standard deviation."))
+      errorCondition(recall=singleSampleZTestNMBU, message=gettextRcmdr("You must specify a standard deviation."))
     }
     sd1 <- as.numeric(sd1)
     if (length(x) == 0){
-      errorCondition(recall=singleSampleZTest, message=gettextRcmdr("You must select a variable."))
+      errorCondition(recall=singleSampleZTestNMBU, message=gettextRcmdr("You must select a variable."))
       return()
     }
     alternative <- as.character(tclvalue(alternativeVariable))
     level <- tclvalue(confidenceLevel)
     mu <- tclvalue(muVariable)
     closeDialog()
-    doItAndPrint(paste("z.test(", ActiveDataSet(), "$", x,
+    doItAndPrint(paste("z_test(", ActiveDataSet(), "$", x,
                        ", alternative='", alternative, "', mu=", mu, ", conf.level=", level,
                        ", sds=", sd1,")", sep=""))
     tkdestroy(top)
     tkfocus(CommanderWindow())
   }
-  OKCancelHelp(helpSubject="t_test")
+  OKCancelHelp(helpSubject="z_test")
   radioButtons(top, name="alternative", buttons=c("twosided", "less", "greater"), values=c("two.sided", "less", "greater"),
                labels=gettextRcmdr(c("Population mean != mu0", "Population mean < mu0", "Population mean > mu0")),
                title=gettextRcmdr("Alternative Hypothesis"))
@@ -2557,11 +2557,11 @@ twoSamplesZTest <- function(){
     sd1 <- as.numeric(sd1)
     sd2 <- as.numeric(sd2)
     if (length(x) == 0 | length(y) == 0){
-      errorCondition(recall=twoSamplesTTest, message=gettextRcmdr("You must select two variables."))
+      errorCondition(recall=twoSamplesZTest, message=gettextRcmdr("You must select two variables."))
       return()
     }
     if (x == y){
-      errorCondition(recall=twoSamplesTTest, message=gettextRcmdr("Variables must be different."))
+      errorCondition(recall=twoSamplesZTest, message=gettextRcmdr("Variables must be different."))
       return()
     }
     alternative <- as.character(tclvalue(alternativeVariable))
@@ -2570,7 +2570,7 @@ twoSamplesZTest <- function(){
     mu <- tclvalue(mu0Level)
     closeDialog()
     .activeDataSet <- ActiveDataSet()
-    doItAndPrint(paste("z.test(", .activeDataSet, "$", x, ", ",
+    doItAndPrint(paste("z_test(", .activeDataSet, "$", x, ", ",
                        .activeDataSet, "$", y,
                        ", alternative='", alternative, "', mu=", mu, ", conf.level=", level,
                        ", var.equal=", variances,
@@ -2578,7 +2578,7 @@ twoSamplesZTest <- function(){
     tkfocus(CommanderWindow())
   }
   # Set up GUI
-  OKCancelHelp(helpSubject="t_test")
+  OKCancelHelp(helpSubject="z_test")
   optionsFrame <- tkframe(top)
   radioButtons(optionsFrame, name="alternative", buttons=c("twosided", "less", "greater"), values=c("two.sided", "less", "greater"),
                labels=gettextRcmdr(c("Two-sided", "Difference < mu0", "Difference > mu0")), title=gettextRcmdr("Alternative Hypothesis"))
@@ -2714,7 +2714,7 @@ RelComp <- function(){
     }    
     if (is.element(y, x)) {
       UpdateModelNumber(-1)
-      errorCondition(recall=plsRegressionModel, message=gettextRcmdr("Response and explanatory variables must be different."))
+      errorCondition(recall=Relcomp, message=gettextRcmdr("Response and explanatory variables must be different."))
       return()
     }
     subset <- if (trim.blanks(subset) == gettextRcmdr("<all valid cases>")) ", subset=NULL" else paste(", subset=", subset, sep="")

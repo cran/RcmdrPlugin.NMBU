@@ -74,7 +74,7 @@ sortData <- function(){
   onOK <- function(){ # Actions to perform
     x <- getSelection(xBox)
     if (length(x) != 1){
-      errorCondition(recall=twoSamplesTTest, message=gettextRcmdr("You must select one variable."))
+      errorCondition(recall=sortData, message=gettextRcmdr("You must select one variable."))
       return()
     }
     closeDialog()

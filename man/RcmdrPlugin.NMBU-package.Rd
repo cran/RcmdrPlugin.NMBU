@@ -142,7 +142,7 @@
 \alias{xtable.numSummary}
 \docType{package}
 \title{
-  R Commander statistics plugin (RcmdrPlugin.NMBU)
+  R Commander Plug-in for University Level Applied Statistics
 }
 \description{
   This package provides an Rcmdr "plug-in" extending some functions of 

@@ -35,7 +35,7 @@ predictRegressionModel <- function(){
       initializeDialog(title=gettextRcmdr("Prediction in discriminant analysis"))
       ff <- justDoIt(paste("colnames(", .activeModel, "$means)", sep=""))
     } else {
-      if(model.class == "lm"){
+      if(model.class == "lm" || model.class == "lmm"){
         initializeDialog(title=gettextRcmdr("Prediction in linear regression"))
         ff <- justDoIt(paste("fparse(formula(", .activeModel, "))", sep=""))
       } else {
@@ -53,7 +53,7 @@ predictRegressionModel <- function(){
     effFrames[[i]] <- tkframe(top)
     effs[[i]] <- ttkentry(effFrames[[i]], width="7", textvariable=effNames[[i]])
   }
-  if(model.class == "lm"){
+  if(model.class == "lm" || model.class == "lmm"){
     levelName   <- tclVar("0.95")
     levelFrame  <- tkframe(top)
     level       <- ttkentry(levelFrame, width="5", textvariable=levelName)
@@ -75,7 +75,7 @@ predictRegressionModel <- function(){
 		errorCondition(recall=predictRegressionModel, message=gettextRcmdr("Use period (.) instead of comma (,) as decimal mark."))
 	  }
     }
-    if(model.class == "lm"){
+    if(model.class == "lm" || model.class == "lmm"){
       levs <- tclvalue(levelName)
       if(trim.blanks(levs) == gettextRcmdr("")){
         errorCondition(recall=predictRegressionModel, message=gettextRcmdr("Please specify confidence level."))
@@ -117,7 +117,7 @@ predictRegressionModel <- function(){
       }			
     }
     doItAndPrint(command)
-    if(model.class == "lm" && extrap == gettextRcmdr("1")){
+    if((model.class == "lm" || model.class == "lmm") && extrap == gettextRcmdr("1")){
       doItAndPrint(paste("max(hatvalues(", .activeModel, ")) # h_max", sep=""))}
     # if(model.class == "lm"){
     # extrap <- tclvalue(extrapVariable)
@@ -150,7 +150,7 @@ predictRegressionModel <- function(){
   tkgrid(labelRcmdr(top,text=''),sticky="w", row=3, column=1, columnspan=max(n.eff,2))
   
   n.row <- 4
-  if(model.class == "lm"){
+  if(model.class == "lm" || model.class == "lmm"){
     tkgrid(labelRcmdr(levelFrame, text=gettextRcmdr("Confidence level:")), level, sticky="w")
     tkgrid(levelFrame, sticky="n", row=4, column=1, columnspan=max(floor(n.eff/2),1))
     checkBoxes(frame="extrapFrame", boxes=c("extrap"), initialValues=c("0"),

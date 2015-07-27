@@ -37,4 +37,5 @@ if (getRversion() >= "2.15.1")
 		 ".groups",".levels","multinom","typeFrame", "tkget", "tktag.add", "tkyview.moveto", "panel.rug",
 		 "var.jack","fparse","fractions","panel.segments","panel.text","panel.points","panel.levelplot",
 		 "trellis.par.set","trellis.focus","trellis.unfocus","trellis.par.get","panel.xyplot","current.panel.limits",
-		 "panel.axis","dmvnorm","fitdistr","xtable","Rows","xyplot","levelplot","Anova","linearHypothesis"))
+		 "panel.axis","dmvnorm","fitdistr","xtable","Rows","xyplot","levelplot","Anova","linearHypothesis",
+		"dataTab","optionsTab","notebook","ordinalRegressionModel"))

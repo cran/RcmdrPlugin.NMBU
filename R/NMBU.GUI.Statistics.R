@@ -467,8 +467,13 @@ principalComponentsStat <- function(){
         return()
       }
     }
-    subset <- if (trim.blanks(subset) == "" || trim.blanks(subset) == gettextRcmdr("<all valid cases>")) ""
-    else paste(", subset=", subset, sep="")
+    if (trim.blanks(subset) == "" || trim.blanks(subset) == gettextRcmdr("<all valid cases>")){
+		subset <- ""
+		putRcmdr("modelWithSubset", FALSE)
+	} else {
+		subset <- paste(", subset=", subset, sep="")
+		putRcmdr("modelWithSubset", TRUE)
+	}
     correlations <- if (correlations == "1") "TRUE" else "FALSE"
     .activeDataSet <- ActiveDataSet()
     doItAndPrint(paste("\n  ", modelValue, " <- prcomp(~", paste(x, collapse = "+"), 
@@ -704,96 +709,106 @@ discriminantAnalysis <- function(){
 
 ###################################################
 # Hierarchical clustering of variables
-hierarchicalClusterVariable <- function(){
-  solutionNumber=length(listHclustSolutions())
-  initializeDialog(title=gettextRcmdr("Hierarchical Clustering of Variables"))
-  solutionFrame <- tkframe(top)
-  solutionName <- tclVar(paste("HClust.", (solutionNumber+1),
-                               sep=""))
-  solutionField <- ttkentry(solutionFrame, width="20",
-                            textvariable=solutionName)
-  dataFrame <- tkframe(top)
-  xBox <- variableListBox(dataFrame, Numeric(), selectmode="multiple",
-                          title=gettextRcmdr("Variables (pick one or more)"))
-  subsetBox(dataFrame)
-  radioButtons(name="method",
-               buttons=c("ward", "single", "complete","average", "mcquitty", "median",
-                         "centroid"), labels=gettextRcmdr(c("Ward's Method", "Single Linkage",
-                                                            "Complete Linkage", "Average Linkage", "McQuitty's Method",
-                                                            "Median Linkage", "Centroid Linkage")), title=gettextRcmdr("Clustering Method"))
-  optionsFrame <- tkframe(top)
-  radioButtons(optionsFrame, name="distanceType", buttons=c("cor1", "cor2"),
-               labels=gettextRcmdr(c("Correlation", "Absolute correlation")), title=gettextRcmdr("Distance Measure"))
-  checkFrame <- tkframe(optionsFrame)
-  plotDendro <- tclVar("1")
-  plotCB <- tkcheckbutton(checkFrame)
-  tkconfigure(plotCB, variable=plotDendro)
-  onOK <- function(){ # Actions to perform
-    x <- getSelection(xBox)
-    nvar <- length(x)
-    clusMethod <- tclvalue(methodVariable)
-    distance <- tclvalue(distanceTypeVariable)
-    subset <- trim.blanks(tclvalue(subsetVariable))
-    dendro <- tclvalue(plotDendro)
-    solution <- trim.blanks(tclvalue(solutionName))
-    if (length(x)==0) {
-      errorCondition(recall=hierarchicalClusterVariable, 
-                     message=gettextRcmdr("No variables selected."))
-      return()
-    }
-    closeDialog()
-    varFormula <- paste(x, collapse="+")
-    vars <- paste(x, collapse=",", sep="")
-    .activeDataSet <- ActiveDataSet()
-    dset <- if (subset == gettextRcmdr("<all valid cases>")) .activeDataSet
-    else {paste(.activeDataSet, "[", .activeDataSet, "$", subset, ", ]",
-                sep="")}
-    xmat <- paste("model.matrix(~-1 + ", varFormula, ", ", dset, ")",
-                  sep="")
-    if(distance=="cor1") {
-      dx <- paste("as.dist(1-cor(", xmat, "))", sep="")
-      distlab <- "correlation"
-    }
-    else {
-      dx <- paste("as.dist(1-abs(cor(", xmat, ")))", sep="")
-      distlab <- "absolute correlation"
-    }
-    command <- paste("hclust(", dx, " , method= ", '"', clusMethod, '"',
-                     ")", sep="")
-    #    assign(solution, justDoIt(command), envir=.GlobalEnv)
-    #    logger(paste(solution, " <- ", command, sep=""))
-    doItAndPrint(paste(solution, " <- ", command, sep=""))
-    if (dendro == "1") {
-      justDoIt(paste("plot(", solution, ", main= ",'"',
-                     "Cluster Dendrogram for Solution ", solution, '"', ", xlab= ",
-                     '"',"Observation Number in Data Set ", dset, '"',
-                     ", sub=", '"', "Method=", clusMethod,
-                     "; Distance=", distlab, '"', ")", sep=""))
-      logger(paste("plot(", solution, ", main= ",'"',
-                   "Cluster Dendrogram for Solution ", solution, '"', ", xlab= ",
-                   '"',"Observation Number in Data Set ", dset, '"',
-                   ", sub=", '"', "Method=", clusMethod,
-                   "; Distance=", distlab, '"', ")",
-                   sep=""))
-    }
-    activateMenus()
-    tkfocus(CommanderWindow())
-  }
-  # Set up GUI
-  OKCancelHelp(helpSubject="hclust")
-  tkgrid(solutionField, sticky="w")
-  tkgrid(labelRcmdr(top, text=gettextRcmdr("Clustering solution name:")),
-         solutionFrame, sticky="w")
-  tkgrid(getFrame(xBox), sticky="nw")
-  tkgrid(subsetFrame, sticky="w")
-  tkgrid(distanceTypeFrame, sticky="w")
-  tkgrid(labelRcmdr(checkFrame, text="  "), sticky="w")
-  tkgrid(labelRcmdr(checkFrame, text=gettextRcmdr("Plot Dendrogram  ")), plotCB,
-         sticky="w")
-  tkgrid(checkFrame, sticky="w")
-  tkgrid(dataFrame, methodFrame, optionsFrame, sticky="nw")
-  tkgrid(buttonsFrame, columnspan=3, sticky="w")
-  dialogSuffix(rows=3, columns=3)
+hierarchicalClusterVariable <- function () {
+	solutionNumber = length(listHclustSolutions())
+	defaults <- list(initial.x = NULL, initial.clusMethod = "ward", initial.distance = "cor1",  
+			initial.subset = gettextRcmdr ("<all valid cases>"),
+			initial.dendro = 1, initial.tab=0)
+	dialog.values <- getDialog("hierarchicalClusterVariable", defaults)
+	initializeDialog(title = gettextRcmdr("Hierarchical Clustering of Variables"), use.tabs=TRUE)
+	solutionFrame <- tkframe(dataTab)
+	solutionName <- tclVar(paste("HClust.", (solutionNumber + 
+								1), sep = ""))
+	solutionField <- ttkentry(solutionFrame, width = "20", textvariable = solutionName)
+	dataFrame <- tkframe(dataTab)
+	xBox <- variableListBox(dataFrame, Numeric(), selectmode = "multiple", 
+			title = gettextRcmdr("Variables (pick one or more)"), 
+			initialSelection = varPosn (dialog.values$initial.x, "numeric"))
+	subsetBox(dataFrame, subset.expression = dialog.values$initial.subset)
+	radioButtons(optionsTab, name = "method", buttons = c("ward", "single", 
+					"complete", "average", "mcquitty", "median", "centroid"), 
+			labels = gettextRcmdr(c("Ward's Method", "Single Linkage", 
+							"Complete Linkage", "Average Linkage", "McQuitty's Method", 
+							"Median Linkage", "Centroid Linkage")), title = gettextRcmdr("Clustering Method"), 
+			initialValue = dialog.values$initial.clusMethod)
+	optionsFrame <- tkframe(optionsTab)
+	radioButtons(optionsFrame, name = "distanceType", buttons = c("cor1", "cor2"),
+			labels = gettextRcmdr(c("Correlation", "Absolute correlation")), 
+			title = gettextRcmdr("Distance Measure"), 
+			initialValue = dialog.values$initial.distance)
+	checkFrame <- tkframe(optionsFrame)
+	plotDendro <- tclVar(dialog.values$initial.dendro)
+	plotCB <- ttkcheckbutton(checkFrame)
+	tkconfigure(plotCB, variable = plotDendro)
+	onOK <- function() {
+	    tab <- if (as.character(tkselect(notebook)) == dataTab$ID) 0 else 1
+		x <- getSelection(xBox)
+		nvar <- length(x)
+		clusMethod <- tclvalue(methodVariable)
+		distance <- tclvalue(distanceTypeVariable)
+		subset <- trim.blanks(tclvalue(subsetVariable))
+		dendro <- tclvalue(plotDendro)
+		solution <- trim.blanks(tclvalue(solutionName))
+		if (length(x) == 0) {
+			errorCondition(recall = hierarchicalClusterVariable, message = gettextRcmdr("No variables selected."))
+			return()
+		}
+		putDialog("hierarchicalClusterVariable", list(initial.x = x, initial.clusMethod = clusMethod, 
+						initial.distance = distance, initial.subset = subset,
+						initial.dendro = dendro, initial.tab = tab))
+		closeDialog()
+		varFormula <- paste(x, collapse = "+")
+		vars <- paste(x, collapse = ",", sep = "")
+		.activeDataSet <- ActiveDataSet()
+		dset <- if (subset == gettextRcmdr("<all valid cases>")) 
+					.activeDataSet
+				else {
+					paste(.activeDataSet, "[", .activeDataSet, "$", subset, 
+							", ]", sep = "")
+				}
+		xmat <- paste("model.matrix(~-1 + ", varFormula, ", ", 
+				dset, ")", sep = "")
+		if(distance=="cor1") {
+		  dx <- paste("dist(1-cor(", xmat, "))", sep="")
+		  distlab <- "correlation"
+		}
+		else {
+		  dx <- paste("dist(1-abs(cor(", xmat, ")))", sep="")
+		  distlab <- "absolute correlation"
+		}
+		command <- paste("hclust(", dx, " , method= ", "\"", 
+				clusMethod, "\"", ")", sep = "")
+        doItAndPrint(paste(solution, " <- ", command, sep = ""))
+		if (dendro == "1") {
+			justDoIt(paste("plot(", solution, ", main= ", "\"", 
+							"Cluster Dendrogram for Solution ", solution, 
+							"\"", ", xlab= ", "\"", "Observation Number in Data Set ", 
+							dset, "\"", ", sub=", "\"", "Method=", clusMethod, 
+							"; Distance=", distlab, "\"", ")", sep = ""))
+			logger(paste("plot(", solution, ", main= ", "\"", 
+							"Cluster Dendrogram for Solution ", solution, 
+							"\"", ", xlab= ", "\"", "Observation Number in Data Set ", 
+							dset, "\"", ", sub=", "\"", "Method=", clusMethod, 
+							"; Distance=", distlab, "\"", ")", sep = ""))
+		}
+		activateMenus()
+		tkfocus(CommanderWindow())
+	}
+	OKCancelHelp(helpSubject = "hclust", reset = "hierarchicalClusterVariable", 
+                 apply = "hierarchicalClusterVariable", model = TRUE)
+	tkgrid(solutionField, sticky = "w")
+	tkgrid(labelRcmdr(dataTab, text = gettextRcmdr("Clustering solution name:")), 
+			solutionFrame, sticky = "w")
+	tkgrid(getFrame(xBox), sticky = "nw")
+	tkgrid(subsetFrame, sticky = "w")
+	tkgrid(distanceTypeFrame, sticky = "w")
+	tkgrid(labelRcmdr(checkFrame, text = "  "), sticky = "w")
+	tkgrid(plotCB, labelRcmdr(checkFrame, text = gettextRcmdr("Plot Dendrogram  ")), 
+			sticky = "w")
+	tkgrid(checkFrame, sticky = "w")
+    tkgrid(dataFrame, sticky="w")
+    tkgrid(methodFrame, optionsFrame, sticky="nw")
+	dialogSuffix(use.tabs=TRUE, grid.buttons=TRUE)
 }
 
 ############################
@@ -1035,9 +1050,9 @@ twoWayTableNMBU <- function(){
 ################################
 # Analysis of variance
 linearModelNMBU <- function(){
-  defaults <- list(initial.contr="contr.sum", initial.output=c("1","0","0","0","0"), initial.subset = gettextRcmdr("<all valid cases>"))
-  dialog.values <- getDialog("linearModelNMBU", defaults)
   initializeDialog(title=gettextRcmdr("Linear model (regression/ANOVA) - specify model"))
+  defaults <- list(initial.contr="contr.sum", initial.output=c("1","0","0","0","0"), initial.subset = gettextRcmdr("<all valid cases>"), initial.weight = gettextRcmdr("<no variable selected>"))
+  dialog.values <- getDialog("linearModelNMBU", defaults)
   .activeModel <- ActiveModel()
   variables <- Variables()
   factors <- Factors()
@@ -1086,11 +1101,12 @@ linearModelNMBU <- function(){
     if (as.numeric(R.Version()$major) >= 2) print(help("mixlm"))
     else help("mixlm")
   }
-  helpButton <- buttonRcmdr(optionsFrame, text=gettextRcmdr("Random effects help"), width="20", command=onRandom, borderwidth=3)
+  helpButton <- buttonRcmdr(optionsFrame, text=gettextRcmdr("Random effects help"), width="20", command=onRandom, borderwidth=3,
+        image="::image::helpIcon", compound="left")
   tkgrid(helpButton, sticky="w")
   
   currentModel <- if (!is.null(.activeModel))
-    class(get(.activeModel, envir=.GlobalEnv))[1] == "lm" || class(get(.activeModel, envir=.GlobalEnv))[1] == "mer"
+    class(get(.activeModel, envir=.GlobalEnv))[1] == "lm" || class(get(.activeModel, envir=.GlobalEnv))[1] == "lmm" || class(get(.activeModel, envir=.GlobalEnv))[1] == "mer"
   else FALSE
   if (currentModel) {
     currentFields <- formulaFields2(get(.activeModel, envir=.GlobalEnv))
@@ -1117,9 +1133,10 @@ linearModelNMBU <- function(){
       return()
     }
     subset <- tclvalue(subsetVariable)
-    putDialog ("linearModelNMBU", list (initial.contr = tclvalue(contrVariable), initial.output = c(tclvalue(regVariable),
-                                                                                                    tclvalue(type1Variable), tclvalue(type2Variable), tclvalue(type3Variable), tclvalue(typeRVariable)), 
-                                        initial.subset = subset))
+    weight.var <- getSelection(weightComboBox)
+    putDialog ("linearModelNMBU", list (initial.contr = tclvalue(contrVariable), 	
+			   initial.output = c(tclvalue(regVariable),
+               tclvalue(type1Variable), tclvalue(type2Variable), tclvalue(type3Variable), tclvalue(typeRVariable)), initial.subset = subset, initial.weight = weight.var))
     if (trim.blanks(subset) == gettextRcmdr("<all valid cases>") || trim.blanks(subset) == ""){
       subset <- ""
       putRcmdr("modelWithSubset", FALSE)
@@ -1128,6 +1145,8 @@ linearModelNMBU <- function(){
       subset <- paste(", subset=", subset, sep="")
       putRcmdr("modelWithSubset", TRUE)
     }
+    weights <- if (weight.var == gettextRcmdr("<no variable selected>")) ""
+    else paste(", weights=", weight.var, sep="")
     check.empty <- gsub(" ", "", tclvalue(lhsVariable))
     if ("" == check.empty) {
       errorCondition(recall=linearModelNMBU, message=gettextRcmdr("Left-hand side of model empty."), model=TRUE)
@@ -1145,6 +1164,7 @@ linearModelNMBU <- function(){
         return()
       }
     }
+	old.contr <- options("contrasts")
     if(tclvalue(contrVariable) != gettextRcmdr("reml")){
       if(tclvalue(contrVariable)==gettextRcmdr("contr.sum")){
         command <- "options(contrasts=c('contr.sum','contr.poly'))"
@@ -1165,10 +1185,10 @@ linearModelNMBU <- function(){
     }
     
     type <- as.character(tclvalue(contrVariable))
-    formula2 <- formula1 <- paste(tclvalue(lhsVariable), tclvalue(rhsVariable), sep=" ~ ")
+	formula1 <- paste(tclvalue(lhsVariable), tclvalue(rhsVariable), sep=" ~ ")
     
     formula1 <- paste("lm(", formula1, sep="")
-    command <- paste(formula1, ", data=", .activeDataSet, subset, sep="")
+    command <- paste(formula1, ", data=", .activeDataSet, subset, weights, sep="")
     if(tclvalue(contrVariable)==gettextRcmdr("reml"))
       command <- paste(command, ", REML=TRUE)", sep="")
     else
@@ -1176,35 +1196,45 @@ linearModelNMBU <- function(){
     #	logger(paste(modelValue, " <- ", command, sep=""))
     #    assign(modelValue, justDoIt(command), envir=.GlobalEnv)
     doItAndPrint(paste(modelValue, " <- ", command, sep=""))
+	options(contrasts = old.contr$contrasts)	
     activeModel(modelValue)
-    if(tclvalue(regVariable)   == gettextRcmdr("1")) doItAndPrint(paste("summary(", modelValue, ")", sep=""))
-    if(tclvalue(type1Variable) == gettextRcmdr("1")) doItAndPrint(paste("anova(", ActiveModel(), ")", sep=""))
-    if(tclvalue(type2Variable) == gettextRcmdr("1")) doItAndPrint(paste("Anova(", ActiveModel(), ', type="II")', sep=""))
-    if(tclvalue(type3Variable) == gettextRcmdr("1")) doItAndPrint(paste("Anova(", ActiveModel(), ', type="III")', sep=""))
-    if(tclvalue(typeRVariable) == gettextRcmdr("1")) doItAndPrint(paste("anova_reg(", ActiveModel(), ')', sep=""))
+	if(!is.null(ActiveModel())){
+		if(tclvalue(regVariable)   == gettextRcmdr("1")) doItAndPrint(paste("summary(", modelValue, ")", sep=""))
+		if(tclvalue(type1Variable) == gettextRcmdr("1")) doItAndPrint(paste("anova(", ActiveModel(), ")", sep=""))
+		if(tclvalue(type2Variable) == gettextRcmdr("1")) doItAndPrint(paste("Anova(", ActiveModel(), ', type="II")', sep=""))
+		if(tclvalue(type3Variable) == gettextRcmdr("1")) doItAndPrint(paste("Anova(", ActiveModel(), ', type="III")', sep=""))
+		if(tclvalue(typeRVariable) == gettextRcmdr("1")) doItAndPrint(paste("anova_reg(", ActiveModel(), ')', sep=""))
+	}
     #    if(tclvalue(mixVariable)   == gettextRcmdr("1")) mixed.modelGUI()
     tkfocus(CommanderWindow())
   }
   env <- environment()
   tkgrid(labelRcmdr(groupsFrame, text="    "), factorsButton, sticky="w")
   
-  OKCancelHelp(helpSubject="linearModel", model=TRUE, reset="resetLinearModelNMBU")
+  OKCancelHelp(helpSubject="linearModel", model=TRUE, reset="resetLinearModelNMBU", apply="linearModelNMBU")
   tkgrid(labelRcmdr(modelFrame, text=gettextRcmdr("Enter name for model:")), model, sticky="w")
   tkgrid(modelFrame, sticky="w", column=1, row=1, columnspan=2)
-  modelFormula3(.variables=variables, .factors=factors)
+  modelFormula3()#.variables=variables, .factors=factors)
   
-  subsetBox(subset.expression = dialog.values$initial.subset)
+  subsetWeightFrame <- tkframe(top)
+
+  subsetBox(window=subsetWeightFrame, model=TRUE)#subset.expression = dialog.values$initial.subset)
+  weightComboBox <- variableComboBox(subsetWeightFrame, variableList=Numeric(), 
+                                     initialSelection=dialog.values$initial.weight,
+                                     title=gettextRcmdr("Weights"))
   tkgrid(getFrame(xBox), sticky="w", column=1, row=2, columnspan=1)
   tkgrid(groupsFrame, sticky="w", column=2, row=2, columnspan=1)
   tkgrid(outerOperatorsFrame, sticky="w", column=1, row=3, columnspan=2)
   tkgrid(formulaFrame, sticky="w", column=1, row=4, columnspan=2)
+  tkgrid(subsetFrame, tklabel(subsetWeightFrame, text="   "),
+         getFrame(weightComboBox), sticky="nw")
   radioButtons(name="contr", buttons=c("contr.sum", "contr.treatment", "reml"), values=c("contr.sum", "contr.treatment", "reml"), initialValue = dialog.values$initial.contr, #"contr.sum",
                labels=gettextRcmdr(c("Sum to zero (contr.sum)", "Reference level (contr.treatment)", "REML")), title=gettextRcmdr("Parameterization"))
   tkgrid(contrFrame, row=5, column=1, rowspan=1, columnspan=1, sticky="w")
-  tkgrid(subsetFrame, sticky="w", column=1, row=6)
+  tkgrid(subsetWeightFrame, sticky="w", column=1, row=6)
   tkgrid(optionsFrame, row=5, column=2, columnspan=1, rowspan=2, sticky="w")
   tkgrid(buttonsFrame, sticky="w", column=1, row=7, columnspan=2)
-  dialogSuffix(rows=7, columns=2)
+  dialogSuffix(rows=7, columns=2,focus=lhsEntry, preventDoubleClick=TRUE)
 }
 resetLinearModelNMBU <- function(){
   putRcmdr("reset.model", TRUE)
@@ -1216,9 +1246,6 @@ resetLinearModelNMBU <- function(){
 ################################
 # Customized GLM
 generalizedLinearModelNMBU <- function(){
-  defaults <- list(initial.contr = "contr.treatment", initial.weights="<none>", initial.offset="<none>")
-  dialog.values <- getDialog("generalizedLinearModelNMBU", defaults)
-  
   families <- c("gaussian", "binomial", "poisson", "Gamma", "inverse.gaussian",
                 "quasibinomial", "quasipoisson")
   links <- c("identity", "inverse", "log", "logit", "probit",
@@ -1236,9 +1263,10 @@ generalizedLinearModelNMBU <- function(){
   colnames(availableLinks) <- links
   canonicalLinks <- c("identity", "logit", "log", "inverse", "1/mu^2", "logit", "log")
   names(canonicalLinks) <- families
+  defaults <- list(initial.weight = gettextRcmdr("<no variable selected>"),initial.offset = gettextRcmdr("<no variable selected>"))
+  dialog.values <- getDialog("generalizedLinearModelNMBU", defaults)
   initializeDialog(title=gettextRcmdr("Generalized Linear Model"))
   .activeModel <- ActiveModel()
-  
   variables <- Variables()
   factors <- Factors()
   # To be able to recreate settings from former models many things are defined here that have to do with randomness and such
@@ -1291,29 +1319,34 @@ generalizedLinearModelNMBU <- function(){
     currentModel <- FALSE
     putRcmdr("reset.model", FALSE)
   }
-  modelFormula3(.variables=variables, .factors=factors)
+  modelFormula3()#.variables=variables, .factors=factors)
   UpdateModelNumber()
   modelName <- tclVar(paste("GLM.", getRcmdr("modelNumber"), sep=""))
   modelFrame <- tkframe(top)
   model <- ttkentry(modelFrame, width="20", textvariable=modelName)
   linkFamilyFrame <- tkframe(top)
   familyFrame <- tkframe(linkFamilyFrame)
-  familyBox <- tklistbox(familyFrame, height="4", exportselection="FALSE",
+  max.height <- getRcmdr("variable.list.height")
+  familyBox <- tklistbox(familyFrame, height=min(max.height, length(families)),
+						 exportselection="FALSE",
                          selectmode="single", background="white")
   familyScroll <- ttkscrollbar(familyFrame,
                                command=function(...) tkyview(familyBox, ...))
   tkconfigure(familyBox, yscrollcommand=function(...) tkset(familyScroll, ...))
   for (fam in families) tkinsert(familyBox, "end", fam)
   linkFrame <- tkframe(linkFamilyFrame)
-  linkBox <- tklistbox(linkFrame, height="4", exportselection="FALSE",
+  linkBox <- tklistbox(linkFrame, height=max.height, exportselection="FALSE",
                        selectmode="single", background="white")
-  weightsName <- tclVar(gettextRcmdr(dialog.values$initial.weights))
-  weightsFrame <- tkframe(top)
-  weights <- ttkentry(weightsFrame, width="20", textvariable=weightsName)
-  offsetName <- tclVar(gettextRcmdr(dialog.values$initial.offset))
+ # subsetFrame <- tkframe(top)
+  weightFrame <- tkframe(top)
   offsetFrame <- tkframe(top)
-  offset <- ttkentry(offsetFrame, width="20", textvariable=offsetName)
   subsetBox(model=TRUE)
+  weightComboBox <- variableComboBox(weightFrame, variableList=Numeric(), 
+                                     initialSelection=dialog.values$initial.weight,
+                                     title=gettextRcmdr("Weights"))
+  offsetComboBox <- variableComboBox(offsetFrame, variableList=Numeric(), 
+                                     initialSelection=dialog.values$initial.offset,
+                                     title=gettextRcmdr("Offset"))
   onFamilySelect <- function(){
     family <- families[as.numeric(tkcurselection(familyBox)) + 1]
     availLinks <- links[availableLinks[family,]]
@@ -1348,13 +1381,14 @@ generalizedLinearModelNMBU <- function(){
         return()
       }
     }
-    if(tclvalue(contrVariable)==gettextRcmdr("contr.sum")){
-      command <- "options(contrasts=c('contr.sum','contr.poly'))"
-    } else {
-      command <- "options(contrasts=c('contr.treatment','contr.poly'))"
-    }
-    if(options("contrasts")$contrasts[1] != tclvalue(contrVariable))
-      doItAndPrint(command)
+#	old.contr <- options("contrasts")
+#    if(tclvalue(contrVariable)==gettextRcmdr("contr.sum")){
+#      command <- "options(contrasts=c('contr.sum','contr.poly'))"
+#    } else {
+#      command <- "options(contrasts=c('contr.treatment','contr.poly'))"
+#    }
+#    if(options("contrasts")$contrasts[1] != tclvalue(contrVariable))
+#      doItAndPrint(command)
     if(!is.logical(chosen.factors)){
       variables <- Variables()
       command <- paste(.activeDataSet, ".tmp <- data.frame(", paste(variables[!is.element(variables,chosen.factors)], "=", ActiveDataSet(), "$", variables[!is.element(variables,chosen.factors)], ", ", sep="", collapse=""), paste(variables[is.element(variables,chosen.factors)], "=factor(", ActiveDataSet(), "$", variables[is.element(variables,chosen.factors)], "), ", sep="", collapse=""), sep="")
@@ -1368,10 +1402,6 @@ generalizedLinearModelNMBU <- function(){
     availLinks <- links[availableLinks[family,]]
     link <- availLinks[as.numeric(tkcurselection(linkBox)) + 1]
     subset <- tclvalue(subsetVariable)
-    weightsValue <- tclvalue(weightsName)
-    offsetValue <- tclvalue(offsetName)
-    putDialog ("generalizedLinearModelNMBU", list (initial.contr = tclvalue(contrVariable), initial.offset = offsetValue,
-                                                   initial.weights = weightsValue))
     closeDialog()
     if (trim.blanks(subset) == gettextRcmdr("<all valid cases>") || trim.blanks(subset) == ""){
       subset <- ""
@@ -1381,8 +1411,15 @@ generalizedLinearModelNMBU <- function(){
       subset <- paste(", subset=", subset, sep="")
       putRcmdr("modelWithSubset", TRUE)
     }
-    command <- paste("glm(", formula, ifelse(offsetValue=="<none>","",paste(" + offset(",offsetValue,")",sep="")), ", family=", family, "(", link,
-                     "),", ifelse(weightsValue=="<none>","",paste(" weights=",weightsValue,"," ,sep="")), " data=", ActiveDataSet(), subset, ")", sep="")
+    weight.var <- getSelection(weightComboBox)
+    offset.var <- getSelection(offsetComboBox)
+    putDialog ("generalizedLinearModelNMBU", list (initial.offset = offset.var,initial.weight = weight.var))
+    weights <- if (weight.var == gettextRcmdr("<no variable selected>")) ""
+    else paste(", weights=", weight.var, sep="")
+    offset <- if (offset.var == gettextRcmdr("<no variable selected>")) ""
+    else paste(", offset=", offset.var, sep="")
+    command <- paste("glm(", formula, ", family=", family, "(", link,
+                     "), data=", ActiveDataSet(), subset, weights, offset, ")", sep="")
     #    logger(paste(modelValue, " <- ", command, sep=""))
     #    assign(modelValue, justDoIt(command), envir=.GlobalEnv)
     doItAndPrint(paste(modelValue, " <- ", command, sep=""))
@@ -1395,37 +1432,44 @@ generalizedLinearModelNMBU <- function(){
       doItAndPrint(paste("Anova(", modelValue, ",test='LR',type=3)", sep=""))
     }
     doItAndPrint(paste("logLik(", modelValue, ")",sep=""))
+#	options(contrasts = old.contr$contrasts)
     tkfocus(CommanderWindow())
   }
   env <- environment()
   tkgrid(labelRcmdr(groupsFrame, text="    "), factorsButton, sticky="w")
   
-  OKCancelHelp(helpSubject="generalizedLinearModel", model=TRUE, reset="resetGLMNMBU")
+  OKCancelHelp(helpSubject="generalizedLinearModel", model=TRUE, reset="resetGLMNMBU", apply="generalizedLinearModelNMBU")
   helpButton <- buttonRcmdr(buttonsFrame, text="Help", width="12", command=onHelp)
   tkgrid(labelRcmdr(modelFrame, text=gettextRcmdr("Enter name for model:")), model, sticky="w")
-  tkgrid(modelFrame, sticky="w", row=1, column=1, columnspan=2)
+  tkgrid(modelFrame, sticky="w", row=1, column=1, columnspan=3)
   tkgrid(getFrame(xBox), sticky="w", row=2, column=1, columnspan=1)
   tkgrid(groupsFrame, sticky="w", column=2, row=2, columnspan=1)
-  tkgrid(outerOperatorsFrame, sticky="w", row=3, column=1, columnspan=2)
-  tkgrid(formulaFrame, sticky="w", row=4, column=1, columnspan=2)
-  radioButtons(name="contr", buttons=c("contr.sum", "contr.treatment"), values=c("contr.sum", "contr.treatment"), initialValue = dialog.values$initial.contr, #"contr.sum",
-               labels=gettextRcmdr(c("Sum to zero (contr.sum)", "Reference level (contr.treatment)")), title=gettextRcmdr("Parameterization"))
-  tkgrid(contrFrame, row=5, column=1, rowspan=1, columnspan=1, sticky="w")
-  spaceFrame <- tkframe(top)
-  tkgrid(labelRcmdr(spaceFrame, text=gettextRcmdr(" ")), sticky="w")
-  tkgrid(spaceFrame, sticky="w", row=6, column=1, columnspan=2)
-  tkgrid(labelRcmdr(weightsFrame, text=gettextRcmdr("Weights (optional):")), weights, sticky="w")
-  tkgrid(weightsFrame, sticky="w", row=7, column=1, columnspan=1)
-  tkgrid(labelRcmdr(offsetFrame, text=gettextRcmdr("    Offset (optional):")), offset, sticky="w")
-  tkgrid(offsetFrame, sticky="w", row=7, column=2, columnspan=1)
-  tkgrid(subsetFrame, sticky="w", row=8, column=1, columnspan=2)
-  tkgrid(labelRcmdr(linkFamilyFrame, text=gettextRcmdr("Family (double-click to select)"), fg="blue"),
-         labelRcmdr(linkFamilyFrame, text="   "), labelRcmdr(linkFamilyFrame, text=gettextRcmdr("Link function"), fg="blue"), sticky="w")
+  tkgrid(outerOperatorsFrame, sticky="w", row=3, column=1, columnspan=3)
+  tkgrid(formulaFrame, sticky="w", row=4, column=1, columnspan=3)
+#  tkgrid(labelRcmdr(subsetFrame, text=gettextRcmdr("Subset expression")), getFrame(subsetBox), sticky="w")
+  tkgrid(labelRcmdr(weightFrame, text=gettextRcmdr("")), getFrame(weightComboBox), sticky="w")
+  tkgrid(labelRcmdr(offsetFrame, text=gettextRcmdr("")), getFrame(offsetComboBox), sticky="w")
+  tkgrid(subsetFrame, sticky="w", row=5, column=1, columnspan=1)
+  tkgrid(weightFrame, sticky="w", row=5, column=2, columnspan=1)
+  tkgrid(offsetFrame, sticky="w", row=5, column=3, columnspan=1)
+#  radioButtons(name="contr", buttons=c("contr.sum", "contr.treatment"), values=c("contr.sum", "contr.treatment"), initialValue = dialog.values$initial.contr, #"contr.sum",
+#               labels=gettextRcmdr(c("Sum to zero (contr.sum)", "Reference level (contr.treatment)")), title=gettextRcmdr("Parameterization"))
+#  tkgrid(contrFrame, row=5, column=1, rowspan=1, columnspan=1, sticky="w")
+#  spaceFrame <- tkframe(top)
+#  tkgrid(labelRcmdr(spaceFrame, text=gettextRcmdr(" ")), sticky="w")
+#  tkgrid(spaceFrame, sticky="w", row=6, column=1, columnspan=2)
+#  tkgrid(labelRcmdr(weightsFrame, text=gettextRcmdr("Weights (optional):")), weights, sticky="w")
+#  tkgrid(weightsFrame, sticky="w", row=7, column=1, columnspan=1)
+#  tkgrid(labelRcmdr(offsetFrame, text=gettextRcmdr("    Offset (optional):")), offset, sticky="w")
+#  tkgrid(offsetFrame, sticky="w", row=7, column=2, columnspan=1)
+#  tkgrid(subsetFrame, sticky="w", row=8, column=1, columnspan=2)
+  tkgrid(labelRcmdr(linkFamilyFrame, text=gettextRcmdr("Family (double-click to select)"), fg=getRcmdr("title.color"), font="RcmdrTitleFont"),
+         labelRcmdr(linkFamilyFrame, text="   "), labelRcmdr(linkFamilyFrame, text=gettextRcmdr("Link function"), fg=getRcmdr("title.color"), font="RcmdrTitleFont"), sticky="w")
   tkgrid(familyBox, familyScroll, sticky="nw")
   tkgrid(linkBox, sticky="nw")
   tkgrid(familyFrame, labelRcmdr(linkFamilyFrame, text="   "), linkFrame, sticky="nw")
-  tkgrid(linkFamilyFrame, sticky="w", row=9, column=1, columnspan=2)
-  tkgrid(buttonsFrame, sticky="w", row=10, column=1, columnspan=2)
+  tkgrid(linkFamilyFrame, sticky="w", row=9, column=1, columnspan=3)
+  tkgrid(buttonsFrame, sticky="w", row=10, column=1, columnspan=3)
   tkgrid.configure(familyScroll, sticky="ns")
   fam <- if (currentModel) which(currentFields$family == families) - 1
   else 1
@@ -1437,11 +1481,12 @@ generalizedLinearModelNMBU <- function(){
   else 0
   tkselection.set(linkBox, lnk)
   tkbind(familyBox, "<Double-ButtonPress-1>", onFamilySelect)
-  dialogSuffix(rows=10, columns=2, focus=lhsEntry, preventDoubleClick=TRUE)
+  dialogSuffix(rows=10, columns=3, focus=lhsEntry, preventDoubleClick=TRUE)
 }
 resetGLMNMBU <- function(){
   putRcmdr("reset.model", TRUE)
   putDialog("generalizedLinearModelNMBU", NULL)
+  putDialog("generalizedLinearModelNMBU", NULL, resettable=FALSE)
   generalizedLinearModelNMBU()
 }
 
@@ -1455,15 +1500,15 @@ multinomialLogitModelNMBU <- function(){
   .activeDataSet <- ActiveDataSet()
   currentModel <- if (!is.null(.activeModel))
     class(get(.activeModel, envir=.GlobalEnv))[1] == "multinom"
-  #        eval(parse(text=paste("class(", .activeModel, ")[1] == 'multinom'", sep="")),
-  #            envir=.GlobalEnv)
-  else FALSE
+		else FALSE
   if (currentModel) {
     currentFields <- formulaFields(get(.activeModel, envir=.GlobalEnv))
-    #        currentFields <- formulaFields(eval(parse(text=.activeModel),
-    #            envir=.GlobalEnv))
     if (currentFields$data != .activeDataSet) currentModel <- FALSE
   }
+	if (isTRUE(getRcmdr("reset.model"))) {
+		currentModel <- FALSE
+		putRcmdr("reset.model", FALSE)
+	}
   UpdateModelNumber()
   modelName <- tclVar(paste("MLM.", getRcmdr("modelNumber"), sep=""))
   modelFrame <- tkframe(top)
@@ -1471,14 +1516,20 @@ multinomialLogitModelNMBU <- function(){
   baseLevel <- tclVar("")
   baseFrame <- tkframe(top)
   baseV <- ttkentry(baseFrame, width="20", textvariable=baseLevel)
-  weightsName <- tclVar(gettextRcmdr("<none>"))
+#  weightsName <- tclVar(gettextRcmdr("<none>"))
   weightsFrame <- tkframe(top)
-  weights <- ttkentry(weightsFrame, width="20", textvariable=weightsName)
+  weightComboBox <- variableComboBox(weightsFrame, variableList=Numeric(), 
+                                     initialSelection=gettextRcmdr("<no variable selected>"),
+                                     title=gettextRcmdr("Weights"))
+#  weights <- ttkentry(weightsFrame, width="20", textvariable=weightsName)
   
   onOK <- function(){
     modelValue <- trim.blanks(tclvalue(modelName))
     baseValue <- trim.blanks(tclvalue(baseLevel))
-    weightsValue <- tclvalue(weightsName)
+#    weightsValue <- tclvalue(weightsName)
+    weight.var <- getSelection(weightComboBox)
+    weights <- if (weight.var == gettextRcmdr("<no variable selected>")) ""
+    else paste(", weights=", weight.var, sep="")
     closeDialog()
     if (!is.valid.name(modelValue)){
       errorCondition(recall=multinomialLogitModelNMBU, message=sprintf(gettextRcmdr('"%s" is not a valid name.'), modelValue), model=TRUE)
@@ -1528,7 +1579,7 @@ multinomialLogitModelNMBU <- function(){
     }
     formula <- paste(tclvalue(lhsVariable), tclvalue(rhsVariable), sep=" ~ ")
     command <- paste("multinom(", formula,
-                     ",", ifelse(weightsValue=="<none>","",paste(" weights=",weightsValue,"," ,sep="")), " data=", .activeDataSet, subset, ", trace=FALSE)", sep="")
+                     weights, ",", " data=", .activeDataSet, subset, ", trace=FALSE)", sep="")
     #    logger(paste(modelValue, " <- ", command, sep=""))
     #    assign(modelValue, justDoIt(command), envir=.GlobalEnv)
     doItAndPrint(paste(modelValue, " <- ", command, sep=""))
@@ -1540,7 +1591,7 @@ multinomialLogitModelNMBU <- function(){
     }
     tkfocus(CommanderWindow())
   }
-  OKCancelHelp(helpSubject="multinom", model=TRUE)
+  OKCancelHelp(helpSubject="multinom", model=TRUE, reset="resetMNLNMBU", apply="multinomialLogitModelNMBU")
   tkgrid(labelRcmdr(modelFrame, text=gettextRcmdr("Enter name for model:")), model, sticky="w")
   tkgrid(modelFrame, sticky="w", row=1, column=1, columnspan=2)
   modelFormula()
@@ -1551,31 +1602,38 @@ multinomialLogitModelNMBU <- function(){
   tkgrid(subsetFrame, sticky="w", row=5, column=1, columnspan=2)
   tkgrid(labelRcmdr(baseFrame, text=gettextRcmdr("Base level (optional):")), baseV, sticky="w")
   tkgrid(baseFrame, sticky="w", row=6, column=1, columnspan=1)
-  tkgrid(labelRcmdr(weightsFrame, text=gettextRcmdr("   Weights (optional):")), weights, sticky="w")
+#  tkgrid(labelRcmdr(weightsFrame, text=gettextRcmdr("   Weights (optional):")), weights, sticky="w")
+  tkgrid(labelRcmdr(weightsFrame, text=gettextRcmdr("")), getFrame(weightComboBox), sticky="w")
   tkgrid(weightsFrame, sticky="w", row=6, column=2, columnspan=1)
   tkgrid(buttonsFrame, sticky="w", row=7, column=1, columnspan=2)
   dialogSuffix(rows=7, columns=2, focus=lhsEntry, preventDoubleClick=TRUE)
 }
 
+resetMNLNMBU <- function(){
+	putRcmdr("reset.model", TRUE)
+	multinomialLogitModelNMBU()
+}
 
 ################################
 # Customized ordinalRegression
 ordinalRegressionModelNMBU <- function(){
+	defaults <- list(initial.type="logistic")
+	dialog.values <- getDialog("ordinalRegressionModel", defaults)
   Library("nnet")
   initializeDialog(title=gettextRcmdr("Ordinal Regression Model"))
   .activeModel <- ActiveModel()
   .activeDataSet <- ActiveDataSet()
   currentModel <- if (!is.null(.activeModel))
     class(get(.activeModel, envir=.GlobalEnv))[1] == "polr"
-  #        eval(parse(text=paste("class(", .activeModel, ")[1] == 'polr'", sep="")),
-  #            envir=.GlobalEnv)
   else FALSE
   if (currentModel) {
     currentFields <- formulaFields(get(.activeModel, envir=.GlobalEnv))
-    #        currentFields <- formulaFields(eval(parse(text=.activeModel),
-    #            envir=.GlobalEnv))
     if (currentFields$data != .activeDataSet) currentModel <- FALSE
   }
+	if (isTRUE(getRcmdr("reset.model"))) {
+		currentModel <- FALSE
+		putRcmdr("reset.model", FALSE)
+	}
   UpdateModelNumber()
   modelName <- tclVar(paste("OrdRegModel.", getRcmdr("modelNumber"), sep=""))
   modelFrame <- tkframe(top)
@@ -1584,12 +1642,18 @@ ordinalRegressionModelNMBU <- function(){
                buttons=c("logistic", "probit", "cloglog"),
                labels=gettextRcmdr(c("Proportional-odds logit", "Ordered probit", "Complementary log-log")),
                title=gettextRcmdr("Type of Model"))
-  weightsName <- tclVar(gettextRcmdr("<none>"))
   weightsFrame <- tkframe(top)
-  weights <- ttkentry(weightsFrame, width="20", textvariable=weightsName)
+  weightComboBox <- variableComboBox(weightsFrame, variableList=Numeric(), 
+                                     initialSelection=gettextRcmdr("<no variable selected>"),
+                                     title=gettextRcmdr("Weights"))
+#  weightsName <- tclVar(gettextRcmdr("<none>"))
+#  weights <- ttkentry(weightsFrame, width="20", textvariable=weightsName)
   onOK <- function(){
     modelValue <- trim.blanks(tclvalue(modelName))
-    weightsValue <- tclvalue(weightsName)
+    weight.var <- getSelection(weightComboBox)
+    weights <- if (weight.var == gettextRcmdr("<no variable selected>")) ""
+    else paste(" weights=", weight.var, ", ", sep="")
+#    weightsValue <- tclvalue(weightsName)
     closeDialog()
     if (!is.valid.name(modelValue)){
       errorCondition(recall=ordinalRegressionModelNMBU, message=sprintf(gettextRcmdr('"%s" is not a valid name.'), modelValue), model=TRUE)
@@ -1628,7 +1692,7 @@ ordinalRegressionModelNMBU <- function(){
     }
     formula <- paste(tclvalue(lhsVariable), tclvalue(rhsVariable), sep=" ~ ")
     command <- paste("polr(", formula, ', method="', tclvalue(modelTypeVariable),
-                     '",', ifelse(weightsValue=='<none>','',paste(' weights=',weightsValue,',' ,sep='')), ' data=', .activeDataSet, subset, ", Hess=TRUE)", sep="")
+                     '",', weights, ' data=', .activeDataSet, subset, ", Hess=TRUE)", sep="")
     #    logger(paste(modelValue, " <- ", command, sep=""))
     #    assign(modelValue, justDoIt(command), envir=.GlobalEnv)
     doItAndPrint(paste(modelValue, " <- ", command, sep=""))
@@ -1636,7 +1700,7 @@ ordinalRegressionModelNMBU <- function(){
     activeModel(modelValue)
     tkfocus(CommanderWindow())
   }
-  OKCancelHelp(helpSubject="polr", model=TRUE)
+  OKCancelHelp(helpSubject="polr", model=TRUE, reset = "resetPOLRNMBU", apply = "ordinalRegressionModelNMBU")
   tkgrid(labelRcmdr(modelFrame, text=gettextRcmdr("Enter name for model:")), model, sticky="w")
   tkgrid(modelFrame, sticky="w", row=1, column=1, columnspan=2)
   modelFormula()
@@ -1646,10 +1710,17 @@ ordinalRegressionModelNMBU <- function(){
   tkgrid(formulaFrame, sticky="w", row=4, column=1, columnspan=2)
   tkgrid(subsetFrame, sticky="w", row=5, column=1, columnspan=2)
   tkgrid(modelTypeFrame, sticky="w", row=6, column=1, columnspan=1)
-  tkgrid(labelRcmdr(weightsFrame, text=gettextRcmdr("   Weights (optional):")), weights, sticky="w")
+#  tkgrid(labelRcmdr(weightsFrame, text=gettextRcmdr("   Weights (optional):")), weights, sticky="w")
+  tkgrid(labelRcmdr(weightsFrame, text=gettextRcmdr("")), getFrame(weightComboBox), sticky="w")
   tkgrid(weightsFrame, sticky="w", row=6, column=2, columnspan=1)
   tkgrid(buttonsFrame, sticky="w", row=7, column=1, columnspan=2)
   dialogSuffix(rows=7, columns=2, focus=lhsEntry, preventDoubleClick=TRUE)
+}
+
+resetPOLRNMBU <- function(){
+	putRcmdr("reset.model", TRUE)
+	putDialog("ordinalRegressionModelNMBU", NULL)
+	ordinalRegressionModel()
 }
 
 ################################

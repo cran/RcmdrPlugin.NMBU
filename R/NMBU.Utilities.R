@@ -111,391 +111,612 @@ listHclustSolutions <- function(envir=.GlobalEnv, ...) {
 
 ############################
 # Model formula adapted to Linear model (extended)
-modelFormula2 <- defmacro(frame=top, hasLhs=TRUE, .variables, .factors, expr={
-		checkAddOperator <- function(rhs){
-			rhs.chars <- rev(strsplit(rhs, "")[[1]])
-			if (length(rhs.chars) < 1) return(FALSE)
-			check.char <- if ((rhs.chars[1] != " ") || (length(rhs.chars) == 1))
-					rhs.chars[1] else rhs.chars[2]
-			!is.element(check.char, c("+", "*", ":", "/", "-", "^", "(", "%"))
-		}
-#		.variables <- Variables()
-		word <- paste("\\[", gettextRcmdr("factor"), "\\]", sep="")
-		variables <- paste(.variables,
-			ifelse(is.element(.variables, .factors), paste("[", gettextRcmdr("factor"), "]", sep=""), ""))
-		xBox <- variableListBox(frame, variables, selectmode="multiple", title=gettextRcmdr("Variables (double-click to formula)"))
-		onDoubleClick <- if (!hasLhs){
-				function(){
-					var <- getSelection(xBox)
-					tkselection.clear(xBox$listbox, "0", "end")					
-					if (length(grep(word, var)) == 1) var <- sub(word, "",  var)
-					tkfocus(rhsEntry)
-					rhs <- tclvalue(rhsVariable)
-					rhs.chars <- rev(strsplit(rhs, "")[[1]])
-					check.char <- if (length(rhs.chars) > 0){
-							if ((rhs.chars[1] != " ") || (length(rhs.chars) == 1))
-								rhs.chars[1] else rhs.chars[2]
-						}
-						else ""
-					tclvalue(rhsVariable) <- if (rhs == "" ||
-							is.element(check.char, c("+", "*", ":", "/", "-", "^", "(", "%")))
-							paste(rhs, var, sep="")
-						else paste(rhs, "+", var)
-					tkicursor(rhsEntry, "end")
-					tkxview.moveto(rhsEntry, "1")
-				}
-			}
-			else{
-				function(){
-					var <- getSelection(xBox)
-					which <- tkcurselection(xBox$listbox)
-					tkselection.clear(xBox$listbox, "0", "end")
-					if (length(grep(word, var)) == 1) var <- sub(word, "",  var)
-					lhs <- tclvalue(lhsVariable)
-					if (lhs == "") tclvalue(lhsVariable) <- var
-					else {
-						tkfocus(rhsEntry)
-						rhs <- tclvalue(rhsVariable)
-						rhs.chars <- rev(strsplit(rhs, "")[[1]])
-						check.char <- if (length(rhs.chars) > 0){
-								if ((rhs.chars[1] != " ") || (length(rhs.chars) == 1))
-									rhs.chars[1] else rhs.chars[2]
-							}
-							else ""
-						tclvalue(rhsVariable) <- if (rhs == "" ||
-								is.element(check.char, c("+", "*", ":", "/", "-", "^", "(", "%")))
-								paste(rhs, var, sep="")
-							else paste(rhs, "+", var)
-					}
-					tkicursor(rhsEntry, "end")
-					tkxview.moveto(rhsEntry, "1")
-				}
-			}
-		tkbind(xBox$listbox, "<Double-ButtonPress-1>", onDoubleClick)
-		onPlus <- function(){
-			rhs <- tclvalue(rhsVariable)
-			var <- getSelection(xBox)
-			tkselection.clear(xBox$listbox, "0", "end")										
-			if ((check <- !checkAddOperator(rhs)) && length(var) == 0) return()
-			if (length(var) > 1){
-				if (length(grep(word, var)) > 0) var <- sub(word, "",  var)
-				if (length(var) > 1) var <- paste(var, collapse=" + ")
-			}
-			tclvalue(rhsVariable) <- paste(rhs, if (!check) " + ", var, sep="")
-			tkicursor(rhsEntry, "end")
-			tkxview.moveto(rhsEntry, "1")
-		}
-		onTimes <- function(){
-			rhs <- tclvalue(rhsVariable)
-			var <- getSelection(xBox)
-			tkselection.clear(xBox$listbox, "0", "end")						
-			if ((check <- !checkAddOperator(rhs)) && length(var) == 0) return()
-			if (length(var) > 1){
-				if (length(grep(word, var)) > 0) var <- sub(word, "",  var)
-				var <- trim.blanks(var)
-				if (length(var) > 1) var <- paste(var, collapse="*")
-				tclvalue(rhsVariable) <- paste(rhs, if (!check) " + ", var, sep="")
-			}
-			else tclvalue(rhsVariable) <- paste(rhs, if (!check) "*", sep="")
-			tkicursor(rhsEntry, "end")
-			tkxview.moveto(rhsEntry, "1")
-		}
-		onColon <- function(){
-			rhs <- tclvalue(rhsVariable)
-			var <- getSelection(xBox)
-			tkselection.clear(xBox$listbox, "0", "end")						
-			if ((check <- !checkAddOperator(rhs)) && length(var) == 0) return()
-			if (length(var) > 1){
-				if (length(grep(word, var)) > 0) var <- sub(word, "",  var)
-				var <- trim.blanks(var)
-				if (length(var) > 1) var <- paste(var, collapse=":")
-				tclvalue(rhsVariable) <- paste(rhs, if (!check) " + ", var, sep="")
-			}
-			else tclvalue(rhsVariable) <- paste(rhs, if (!check) ":", sep="")
-			tkicursor(rhsEntry, "end")
-			tkxview.moveto(rhsEntry, "1")
-		}
-		onSlash <- function(){
-			rhs <- tclvalue(rhsVariable)
-			if (!checkAddOperator(rhs)) return()
-			tclvalue(rhsVariable) <- paste(rhs, "/",  sep="")
-			tkicursor(rhsEntry, "end")
-			tkxview.moveto(rhsEntry, "1")
-		}
-		onIn <- function(){
-			rhs <- tclvalue(rhsVariable)
-			if (!checkAddOperator(rhs)) return()
-			tclvalue(rhsVariable) <- paste(rhs, "%in% ")
-			tkicursor(rhsEntry, "end")
-			tkxview.moveto(rhsEntry, "1")
-		}
-		onMinus <- function(){
-			rhs <- tclvalue(rhsVariable)
-			if (!checkAddOperator(rhs)) return()
-			tclvalue(rhsVariable) <- paste(rhs, "- ")
-			tkicursor(rhsEntry, "end")
-			tkxview.moveto(rhsEntry, "1")
-		}
-		onPower <- function(){
-			rhs <- tclvalue(rhsVariable)
-			if (!checkAddOperator(rhs)) return()
-			tclvalue(rhsVariable) <- paste(rhs, "^", sep="")
-			tkicursor(rhsEntry, "end")
-			tkxview.moveto(rhsEntry, "1")
-		}
-		onLeftParen <- function(){
-			tkfocus(rhsEntry)
-			rhs <- tclvalue(rhsVariable)
-			tclvalue(rhsVariable) <- paste(rhs, "(", sep="")
-			tkicursor(rhsEntry, "end")
-			tkxview.moveto(rhsEntry, "1")
-		}
-		onRightParen <- function(){
-			rhs <- tclvalue(rhsVariable)
-			if (!checkAddOperator(rhs)) return()
-			tclvalue(rhsVariable) <- paste(rhs, ")", sep="")
-			tkicursor(rhsEntry, "end")
-			tkxview.moveto(rhsEntry, "1")
-		}
-		outerOperatorsFrame <- tkframe(frame)
-		operatorsFrame <- tkframe(outerOperatorsFrame)
-		plusButton <- buttonRcmdr(operatorsFrame, text="+", width="3", command=onPlus)
-		timesButton <- buttonRcmdr(operatorsFrame, text="*", width="3", command=onTimes)
-		colonButton <- buttonRcmdr(operatorsFrame, text=":", width="3", command=onColon)
-		slashButton <- buttonRcmdr(operatorsFrame, text="/", width="3", command=onSlash)
-		inButton <- buttonRcmdr(operatorsFrame, text="%in%", width="5", command=onIn)
-		minusButton <- buttonRcmdr(operatorsFrame, text="-", width="3", command=onMinus)
-		powerButton <- buttonRcmdr(operatorsFrame, text="^", width="3", command=onPower)
-		leftParenButton <- buttonRcmdr(operatorsFrame, text="(", width="3", command=onLeftParen)
-		rightParenButton <- buttonRcmdr(operatorsFrame, text=")", width="3", command=onRightParen)
-		
-		tkgrid(plusButton, timesButton, colonButton, slashButton, inButton, minusButton,
-			powerButton, leftParenButton, rightParenButton, sticky="w")
-		formulaFrame <- tkframe(frame)
-		if (hasLhs){
-			tkgrid(labelRcmdr(outerOperatorsFrame, text=gettextRcmdr("Model Formula:     "), fg="blue"), operatorsFrame)
-			lhsVariable <- if (currentModel) tclVar(currentFields$lhs) else tclVar("")
-			rhsVariable <- if (currentModel) tclVar(currentFields$rhs) else tclVar("")
-			rhsEntry <- ttkentry(formulaFrame, width="50", textvariable=rhsVariable)
-			rhsXscroll <- ttkscrollbar(formulaFrame,
-				orient="horizontal", command=function(...) tkxview(rhsEntry, ...))
-			tkconfigure(rhsEntry, xscrollcommand=function(...) tkset(rhsXscroll, ...))
-			lhsEntry <- ttkentry(formulaFrame, width="10", textvariable=lhsVariable)
-			lhsScroll <- ttkscrollbar(formulaFrame,
-				orient="horizontal", command=function(...) tkxview(lhsEntry, ...))
-			tkconfigure(lhsEntry, xscrollcommand=function(...) tkset(lhsScroll, ...))
-			tkgrid(lhsEntry, labelRcmdr(formulaFrame, text=" ~    "), rhsEntry, sticky="w")
-			tkgrid(lhsScroll, labelRcmdr(formulaFrame, text=""), rhsXscroll, sticky="w")
-			tkgrid.configure(lhsScroll, sticky="ew")
-		}
-		else{
-			rhsVariable <- if (currentModel) tclVar(currentFields$rhs) else tclVar("")
-			rhsEntry <- ttkentry(formulaFrame, width="50", textvariable=rhsVariable)
-			rhsXscroll <- ttkscrollbar(formulaFrame,
-				orient="horizontal", command=function(...) tkxview(rhs, ...))
-			tkconfigure(rhsEntry, xscrollcommand=function(...) tkset(rhsXscroll, ...))
-			tkgrid(labelRcmdr(formulaFrame, text="   ~ "), rhsEntry, sticky="w")
-			tkgrid(labelRcmdr(formulaFrame, text=""), rhsXscroll, sticky="w")
-		}
-		tkgrid.configure(rhsXscroll, sticky="ew")
-	})
+modelFormula2 <- defmacro(frame=top, hasLhs=TRUE, expr={
+    checkAddOperator <- function(rhs){
+        rhs.chars <- rev(strsplit(rhs, "")[[1]])
+        if (length(rhs.chars) < 1) return(FALSE)
+        check.char <- if ((rhs.chars[1] != " ") || (length(rhs.chars) == 1))
+            rhs.chars[1] else rhs.chars[2]
+        !is.element(check.char, c("+", "*", ":", "/", "-", "^", "(", "%"))
+    }
+    .variables <- Variables()
+    word <- paste("\\[", gettextRcmdr("factor"), "\\]", sep="")
+    variables <- paste(.variables,
+        ifelse(is.element(.variables, Factors()), paste("[", gettextRcmdr("factor"), "]", sep=""), ""))
+    xBox <- variableListBox(frame, variables, selectmode="multiple", title=gettextRcmdr("Variables (double-click to formula)"))
+    onDoubleClick <- if (!hasLhs){
+        function(){
+            var <- getSelection(xBox)
+            tkselection.clear(xBox$listbox, "0", "end")            		
+            if (length(grep(word, var)) == 1) var <- sub(word, "",  var)
+            tkfocus(rhsEntry)
+            rhs <- tclvalue(rhsVariable)
+            rhs.chars <- rev(strsplit(rhs, "")[[1]])
+            check.char <- if (length(rhs.chars) > 0){
+                if ((rhs.chars[1] != " ") || (length(rhs.chars) == 1))
+                    rhs.chars[1] else rhs.chars[2]
+            }
+            else ""
+            tclvalue(rhsVariable) <- if (rhs == "" ||
+                    is.element(check.char, c("+", "*", ":", "/", "-", "^", "(", "%")))
+                paste(rhs, var, sep="")
+            else paste(rhs, "+", var)
+            tkicursor(rhsEntry, "end")
+            tkxview.moveto(rhsEntry, "1")
+        }
+    }
+    else{
+        function(){
+            var <- getSelection(xBox)
+            which <- tkcurselection(xBox$listbox)
+            tkselection.clear(xBox$listbox, "0", "end")
+            if (length(grep(word, var)) == 1) var <- sub(word, "",  var)
+            lhs <- tclvalue(lhsVariable)
+            if (lhs == "" || tclvalue(tkselection.present(lhsEntry)) == "1"){
+                tclvalue(lhsVariable) <- var
+                tkselection.clear(lhsEntry)
+                tkfocus(rhsEntry)
+            }
+            else {
+                tkfocus(rhsEntry)
+                rhs <- tclvalue(rhsVariable)
+                rhs.chars <- rev(strsplit(rhs, "")[[1]])
+                check.char <- if (length(rhs.chars) > 0){
+                    if ((rhs.chars[1] != " ") || (length(rhs.chars) == 1))
+                        rhs.chars[1] else rhs.chars[2]
+                }
+                else ""
+                tclvalue(rhsVariable) <- if (rhs == "" ||
+                        is.element(check.char, c("+", "*", ":", "/", "-", "^", "(", "%")))
+                    paste(rhs, var, sep="")
+                else paste(rhs, "+", var)
+            }
+            tkicursor(rhsEntry, "end")
+            tkxview.moveto(rhsEntry, "1")
+        }
+    }
+    tkbind(xBox$listbox, "<Double-ButtonPress-1>", onDoubleClick)
+    onPlus <- function(){
+        rhs <- tclvalue(rhsVariable)
+        var <- getSelection(xBox)
+        tkselection.clear(xBox$listbox, "0", "end")										
+        if ((check <- !checkAddOperator(rhs)) && length(var) == 0) return()
+        if (length(var) > 1){
+            if (length(grep(word, var)) > 0) var <- sub(word, "",  var)
+            if (length(var) > 1) var <- paste(var, collapse=" + ")
+        }
+        tclvalue(rhsVariable) <- paste(rhs, if (!check) " + ", var, sep="")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    onTimes <- function(){
+        rhs <- tclvalue(rhsVariable)
+        var <- getSelection(xBox)
+        tkselection.clear(xBox$listbox, "0", "end")						
+        if ((check <- !checkAddOperator(rhs)) && length(var) == 0) return()
+        if (length(var) > 1){
+            if (length(grep(word, var)) > 0) var <- sub(word, "",  var)
+            var <- trim.blanks(var)
+            if (length(var) > 1) var <- paste(var, collapse="*")
+            tclvalue(rhsVariable) <- paste(rhs, if (!check) " + ", var, sep="")
+        }
+        else tclvalue(rhsVariable) <- paste(rhs, if (!check) "*", sep="")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    onColon <- function(){
+        rhs <- tclvalue(rhsVariable)
+        var <- getSelection(xBox)
+        tkselection.clear(xBox$listbox, "0", "end")						
+        if ((check <- !checkAddOperator(rhs)) && length(var) == 0) return()
+        if (length(var) > 1){
+            if (length(grep(word, var)) > 0) var <- sub(word, "",  var)
+            var <- trim.blanks(var)
+            if (length(var) > 1) var <- paste(var, collapse=":")
+            tclvalue(rhsVariable) <- paste(rhs, if (!check) " + ", var, sep="")
+        }
+        else tclvalue(rhsVariable) <- paste(rhs, if (!check) ":", sep="")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    onSlash <- function(){
+        rhs <- tclvalue(rhsVariable)
+        if (!checkAddOperator(rhs)) return()
+        tclvalue(rhsVariable) <- paste(rhs, "/",  sep="")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    onIn <- function(){
+        rhs <- tclvalue(rhsVariable)
+        if (!checkAddOperator(rhs)) return()
+        tclvalue(rhsVariable) <- paste(rhs, "%in% ")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    onMinus <- function(){
+        rhs <- tclvalue(rhsVariable)
+        if (!checkAddOperator(rhs)) return()
+        tclvalue(rhsVariable) <- paste(rhs, "- ")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    onPower <- function(){
+        rhs <- tclvalue(rhsVariable)
+        if (!checkAddOperator(rhs)) return()
+        tclvalue(rhsVariable) <- paste(rhs, "^", sep="")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    onLeftParen <- function(){
+        tkfocus(rhsEntry)
+        rhs <- tclvalue(rhsVariable)
+        tclvalue(rhsVariable) <- paste(rhs, "(", sep="")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    onRightParen <- function(){
+        rhs <- tclvalue(rhsVariable)
+        if (!checkAddOperator(rhs)) return()
+        tclvalue(rhsVariable) <- paste(rhs, ")", sep="")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    outerOperatorsFrame <- tkframe(frame)
+    operatorsFrame <- tkframe(outerOperatorsFrame)
+    splinePolyFrame <- tkframe(outerOperatorsFrame)
+    plusButton <- buttonRcmdr(operatorsFrame, text="+", width="3", command=onPlus)
+    timesButton <- buttonRcmdr(operatorsFrame, text="*", width="3", command=onTimes)
+    colonButton <- buttonRcmdr(operatorsFrame, text=":", width="3", command=onColon)
+    slashButton <- buttonRcmdr(operatorsFrame, text="/", width="3", command=onSlash)
+    inButton <- buttonRcmdr(operatorsFrame, text="%in%", width="5", command=onIn)
+    minusButton <- buttonRcmdr(operatorsFrame, text="-", width="3", command=onMinus)
+    powerButton <- buttonRcmdr(operatorsFrame, text="^", width="3", command=onPower)
+    leftParenButton <- buttonRcmdr(operatorsFrame, text="(", width="3", command=onLeftParen)
+    rightParenButton <- buttonRcmdr(operatorsFrame, text=")", width="3", command=onRightParen)
+    onBSpline <- function(){
+        rhs <- tclvalue(rhsVariable)
+        var <- getSelection(xBox)
+        tkselection.clear(xBox$listbox, "0", "end")
+        if (length(var) == 0) var <- " "
+        if (grepl("\\[factor\\]", var)){
+            Message("spline requires a numeric variable", type="error")
+            return()
+        }
+        if (length(var) > 1){
+            Message("cannot select more than one variable", type="error")
+            return()
+        }
+        check <- !checkAddOperator(rhs)
+        tclvalue(rhsVariable) <- paste(rhs, 
+            if (!check) paste(" + bs(", var, ", df=", tclvalue(dfSplineVar), ")", sep="") 
+            else paste(" bs(", var, ", df=", tclvalue(dfSplineVar), ")", sep=""),
+            sep="")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    onNatSline <- function(){
+        rhs <- tclvalue(rhsVariable)
+        var <- getSelection(xBox)
+        tkselection.clear(xBox$listbox, "0", "end")
+        if (length(var) == 0) var <- " "
+        if (grepl("\\[factor\\]", var)){
+            Message("spline requires a numeric variable", type="error")
+            return()
+        }
+        if (length(var) > 1){
+            Message("cannot select more than one variable", type="error")
+            return()
+        }
+        check <- !checkAddOperator(rhs)
+        tclvalue(rhsVariable) <- paste(rhs, 
+            if (!check) paste(" + ns(", var, ", df=", tclvalue(dfSplineVar), ")", sep="") 
+            else paste(" ns(", var, ", df=", tclvalue(dfSplineVar), ")", sep=""),
+            sep="")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    onPoly <- function(){
+        rhs <- tclvalue(rhsVariable)
+        var <- getSelection(xBox)
+        tkselection.clear(xBox$listbox, "0", "end")
+        if (length(var) == 0) var <- " "
+        if (grepl("\\[factor\\]", var)){
+            Message("polynomial requires a numeric variable", type="error")
+            return()
+        }
+        if (length(var) > 1){
+            Message("cannot select more than one variable", type="error")
+            return()
+        }
+        check <- !checkAddOperator(rhs)
+        tclvalue(rhsVariable) <- paste(rhs, 
+            if (!check) paste(" + poly(", var, ", degree=", tclvalue(degPolyVar), ")", sep="") 
+            else paste(" poly(", var, ", degree=", tclvalue(degPolyVar), ")", sep=""),
+            sep="")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    onRawPoly <- function(){
+        rhs <- tclvalue(rhsVariable)
+        var <- getSelection(xBox)
+        tkselection.clear(xBox$listbox, "0", "end")
+        if (length(var) == 0) var <- " "
+        if (grepl("\\[factor\\]", var)){
+            Message("polynomial requires a numeric variable", type="error")
+            return()
+        }
+        if (length(var) > 1){
+            Message("cannot select more than one variable", type="error")
+            return()
+        }
+        check <- !checkAddOperator(rhs)
+        tclvalue(rhsVariable) <- paste(rhs, 
+            if (!check) paste(" + poly(", var, ", degree=", tclvalue(degPolyVar), ", raw=TRUE)", sep="") 
+            else paste(" poly(", var, ", degree=", tclvalue(degPolyVar), ", raw=TRUE)", sep=""),
+            sep="")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    bsplineButton <- buttonRcmdr(splinePolyFrame, text=gettextRcmdr("B-spline\n"), width="10", command=onBSpline)
+    nsplineButton <- buttonRcmdr(splinePolyFrame, text=gettextRcmdr("natural\nspline"), width="10", command=onNatSline)
+    polyButton <- buttonRcmdr(splinePolyFrame, text=gettextRcmdr("orthogonal\npolynomial"), width="10", command=onPoly)
+    RawPolyButton <- buttonRcmdr(splinePolyFrame, text=gettextRcmdr("raw\npolynomial"), width="10", command=onRawPoly)
+    dfSplineVar <- tclVar("5")
+    degPolyVar <- tclVar("2")
+    dfDegFrame <- tkframe(outerOperatorsFrame)
+    dfSplineSpin <- tkspinbox(dfDegFrame, textvariable=dfSplineVar, state="readonly", from=2, to=10, width=2)
+    degPolySpin <- tkspinbox(dfDegFrame, textvariable=degPolyVar, state="readonly", from=2, to=5, width=2)
+    tkgrid(plusButton, timesButton, colonButton, slashButton, inButton, minusButton,
+        powerButton, leftParenButton, rightParenButton, sticky="w")
+    tkgrid(labelRcmdr(dfDegFrame, text=gettextRcmdr("df for splines: ")), dfSplineSpin,  sticky="se")
+    tkgrid(labelRcmdr(dfDegFrame, text=gettextRcmdr("deg. for polynomials: ")), degPolySpin, sticky="se")
+    formulaFrame <- tkframe(frame)
+    formulaFrameMain <- tkframe(formulaFrame)
+    onFormulaHelp <- function () print(help("formula"))
+    formulaHelpButton <- buttonRcmdr(formulaFrame, text=gettextRcmdr("Model formula\nhelp"), command=onFormulaHelp,
+        image="::image::helpIcon", compound="left")
+    if (hasLhs){
+        tkgrid(labelRcmdr(outerOperatorsFrame, text=gettextRcmdr("Model Formula"), 
+            fg=getRcmdr("title.color"), font="RcmdrTitleFont"), sticky="w")
+        tkgrid(labelRcmdr(outerOperatorsFrame, text="Operators (click to formula):  "), operatorsFrame, sticky="nw")
+        tkgrid(bsplineButton, nsplineButton, polyButton, RawPolyButton, sticky="nw")
+        tkgrid(labelRcmdr(outerOperatorsFrame, text=gettextRcmdr("Splines/Polynomials:\n(select variable and click)")), 
+            splinePolyFrame, dfDegFrame, sticky="nw")
+        lhsVariable <- if (currentModel) tclVar(currentFields$lhs) else tclVar("")
+        rhsVariable <- if (currentModel) tclVar(currentFields$rhs) else tclVar("")
+        rhsEntry <- ttkentry(formulaFrameMain, width="75", textvariable=rhsVariable)
+        rhsXscroll <- ttkscrollbar(formulaFrameMain,
+            orient="horizontal", command=function(...) tkxview(rhsEntry, ...))
+        tkconfigure(rhsEntry, xscrollcommand=function(...) tkset(rhsXscroll, ...))
+        lhsEntry <- ttkentry(formulaFrameMain, width="10", textvariable=lhsVariable)
+        lhsScroll <- ttkscrollbar(formulaFrameMain,
+            orient="horizontal", command=function(...) tkxview(lhsEntry, ...))
+        tkconfigure(lhsEntry, xscrollcommand=function(...) tkset(lhsScroll, ...))
+        tkgrid(lhsEntry, labelRcmdr(formulaFrameMain, text=" ~    "), rhsEntry, sticky="w")
+        tkgrid(lhsScroll, labelRcmdr(formulaFrameMain, text=""), rhsXscroll, sticky="w")
+        tkgrid.configure(lhsScroll, sticky="ew")
+        tkgrid(formulaFrameMain, labelRcmdr(formulaFrame, text="  "), formulaHelpButton, sticky="nw")
+    }
+    else{
+        rhsVariable <- if (currentModel) tclVar(currentFields$rhs) else tclVar("")
+        rhsEntry <- ttkentry(formulaFrameMain, width="75", textvariable=rhsVariable)
+        rhsXscroll <- ttkscrollbar(formulaFrameMain,
+            orient="horizontal", command=function(...) tkxview(rhsEntry, ...))
+        tkconfigure(rhsEntry, xscrollcommand=function(...) tkset(rhsXscroll, ...))
+        tkgrid(labelRcmdr(formulaFrameMain, text="   ~ "), rhsEntry, sticky="w")
+        tkgrid(labelRcmdr(formulaFrameMain, text=""), rhsXscroll, sticky="w")
+        tkgrid(formulaFrameMain, labelRcmdr(formulaFrame, text="  "), formulaHelpButton, sticky="nw")
+    }
+    tkgrid.configure(rhsXscroll, sticky="ew")
+})
+
 ## ... and including random factor r(
-modelFormula3 <- defmacro(frame=top, hasLhs=TRUE, .variables, .factors, expr={
-		checkAddOperator <- function(rhs){
-			rhs.chars <- rev(strsplit(rhs, "")[[1]])
-			if (length(rhs.chars) < 1) return(FALSE)
-			check.char <- if ((rhs.chars[1] != " ") || (length(rhs.chars) == 1))
-					rhs.chars[1] else rhs.chars[2]
-			!is.element(check.char, c("+", "*", ":", "/", "-", "^", "(", "%","r("))
-		}
-#		.variables <- Variables()
-		word <- paste("\\[", gettextRcmdr("factor"), "\\]", sep="")
-		variables <- paste(.variables,
-			ifelse(is.element(.variables, .factors), paste("[", gettextRcmdr("factor"), "]", sep=""), ""))
-		xBox <- variableListBox(frame, variables, selectmode="multiple", title=gettextRcmdr("Variables (double-click to formula)"))
-		onDoubleClick <- if (!hasLhs){
-				function(){
-					var <- getSelection(xBox)
-					tkselection.clear(xBox$listbox, "0", "end")					
-					if (length(grep(word, var)) == 1) var <- sub(word, "",  var)
-					tkfocus(rhsEntry)
-					rhs <- tclvalue(rhsVariable)
-					rhs.chars <- rev(strsplit(rhs, "")[[1]])
-					check.char <- if (length(rhs.chars) > 0){
-							if ((rhs.chars[1] != " ") || (length(rhs.chars) == 1))
-								rhs.chars[1] else rhs.chars[2]
-						}
-						else ""
-					tclvalue(rhsVariable) <- if (rhs == "" ||
-							is.element(check.char, c("+", "*", ":", "/", "-", "^", "(", "%", "r(")))
-							paste(rhs, var, sep="")
-						else paste(rhs, "+", var)
-					tkicursor(rhsEntry, "end")
-					tkxview.moveto(rhsEntry, "1")
-				}
-			}
-			else{
-				function(){
-					var <- getSelection(xBox)
-					which <- tkcurselection(xBox$listbox)
-					tkselection.clear(xBox$listbox, "0", "end")
-					if (length(grep(word, var)) == 1) var <- sub(word, "",  var)
-					lhs <- tclvalue(lhsVariable)
-					if (lhs == "") tclvalue(lhsVariable) <- var
-					else {
-						tkfocus(rhsEntry)
-						rhs <- tclvalue(rhsVariable)
-						rhs.chars <- rev(strsplit(rhs, "")[[1]])
-						check.char <- if (length(rhs.chars) > 0){
-								if ((rhs.chars[1] != " ") || (length(rhs.chars) == 1))
-									rhs.chars[1] else rhs.chars[2]
-							}
-							else ""
-						tclvalue(rhsVariable) <- if (rhs == "" ||
-								is.element(check.char, c("+", "*", ":", "/", "-", "^", "(", "%", "r(")))
-								paste(rhs, var, sep="")
-							else paste(rhs, "+", var)
-					}
-					tkicursor(rhsEntry, "end")
-					tkxview.moveto(rhsEntry, "1")
-				}
-			}
-		tkbind(xBox$listbox, "<Double-ButtonPress-1>", onDoubleClick)
-		onPlus <- function(){
-			rhs <- tclvalue(rhsVariable)
-			var <- getSelection(xBox)
-			tkselection.clear(xBox$listbox, "0", "end")										
-			if ((check <- !checkAddOperator(rhs)) && length(var) == 0) return()
-			if (length(var) > 1){
-				if (length(grep(word, var)) > 0) var <- sub(word, "",  var)
-				if (length(var) > 1) var <- paste(var, collapse=" + ")
-			}
-			tclvalue(rhsVariable) <- paste(rhs, if (!check) " + ", var, sep="")
-			tkicursor(rhsEntry, "end")
-			tkxview.moveto(rhsEntry, "1")
-		}
-		onTimes <- function(){
-			rhs <- tclvalue(rhsVariable)
-			var <- getSelection(xBox)
-			tkselection.clear(xBox$listbox, "0", "end")						
-			if ((check <- !checkAddOperator(rhs)) && length(var) == 0) return()
-			if (length(var) > 1){
-				if (length(grep(word, var)) > 0) var <- sub(word, "",  var)
-				var <- trim.blanks(var)
-				if (length(var) > 1) var <- paste(var, collapse="*")
-				tclvalue(rhsVariable) <- paste(rhs, if (!check) " + ", var, sep="")
-			}
-			else tclvalue(rhsVariable) <- paste(rhs, if (!check) "*", sep="")
-			tkicursor(rhsEntry, "end")
-			tkxview.moveto(rhsEntry, "1")
-		}
-		onColon <- function(){
-			rhs <- tclvalue(rhsVariable)
-			var <- getSelection(xBox)
-			tkselection.clear(xBox$listbox, "0", "end")						
-			if ((check <- !checkAddOperator(rhs)) && length(var) == 0) return()
-			if (length(var) > 1){
-				if (length(grep(word, var)) > 0) var <- sub(word, "",  var)
-				var <- trim.blanks(var)
-				if (length(var) > 1) var <- paste(var, collapse=":")
-				tclvalue(rhsVariable) <- paste(rhs, if (!check) " + ", var, sep="")
-			}
-			else tclvalue(rhsVariable) <- paste(rhs, if (!check) ":", sep="")
-			tkicursor(rhsEntry, "end")
-			tkxview.moveto(rhsEntry, "1")
-		}
-		onSlash <- function(){
-			rhs <- tclvalue(rhsVariable)
-			if (!checkAddOperator(rhs)) return()
-			tclvalue(rhsVariable) <- paste(rhs, "/",  sep="")
-			tkicursor(rhsEntry, "end")
-			tkxview.moveto(rhsEntry, "1")
-		}
-		onIn <- function(){
-			rhs <- tclvalue(rhsVariable)
-			if (!checkAddOperator(rhs)) return()
-			tclvalue(rhsVariable) <- paste(rhs, "%in% ")
-			tkicursor(rhsEntry, "end")
-			tkxview.moveto(rhsEntry, "1")
-		}
-		onMinus <- function(){
-			rhs <- tclvalue(rhsVariable)
-			if (!checkAddOperator(rhs)) return()
-			tclvalue(rhsVariable) <- paste(rhs, "- ")
-			tkicursor(rhsEntry, "end")
-			tkxview.moveto(rhsEntry, "1")
-		}
-		onPower <- function(){
-			rhs <- tclvalue(rhsVariable)
-			if (!checkAddOperator(rhs)) return()
-			tclvalue(rhsVariable) <- paste(rhs, "^", sep="")
-			tkicursor(rhsEntry, "end")
-			tkxview.moveto(rhsEntry, "1")
-		}
-		onLeftParen <- function(){
-			tkfocus(rhsEntry)
-			rhs <- tclvalue(rhsVariable)
-			tclvalue(rhsVariable) <- paste(rhs, "(", sep="")
-			tkicursor(rhsEntry, "end")
-			tkxview.moveto(rhsEntry, "1")
-		}
-		onRightParen <- function(){
-			rhs <- tclvalue(rhsVariable)
-			if (!checkAddOperator(rhs)) return()
-			tclvalue(rhsVariable) <- paste(rhs, ")", sep="")
-			tkicursor(rhsEntry, "end")
-			tkxview.moveto(rhsEntry, "1")
-		}
-		onRandom <- function(){
-			tkfocus(rhsEntry)
-			rhs <- tclvalue(rhsVariable)
-			tclvalue(rhsVariable) <- paste(rhs, "r(", sep="")
-			tkicursor(rhsEntry, "end")
-			tkxview.moveto(rhsEntry, "1")
-		}
-		outerOperatorsFrame <- tkframe(frame)
-		operatorsFrame <- tkframe(outerOperatorsFrame)
-		plusButton <- buttonRcmdr(operatorsFrame, text="+", width="3", command=onPlus)
-		timesButton <- buttonRcmdr(operatorsFrame, text="*", width="3", command=onTimes)
-		colonButton <- buttonRcmdr(operatorsFrame, text=":", width="3", command=onColon)
-		slashButton <- buttonRcmdr(operatorsFrame, text="/", width="3", command=onSlash)
-		inButton <- buttonRcmdr(operatorsFrame, text="%in%", width="5", command=onIn)
-		minusButton <- buttonRcmdr(operatorsFrame, text="-", width="3", command=onMinus)
-		powerButton <- buttonRcmdr(operatorsFrame, text="^", width="3", command=onPower)
-		leftParenButton <- buttonRcmdr(operatorsFrame, text="(", width="3", command=onLeftParen)
-		rightParenButton <- buttonRcmdr(operatorsFrame, text=")", width="3", command=onRightParen)
-		randomButton <- buttonRcmdr(operatorsFrame, text="r(", width="3", command=onRandom)
-		
-		tkgrid(plusButton, timesButton, colonButton, slashButton, inButton, minusButton,
-			powerButton, leftParenButton, rightParenButton, randomButton, sticky="w")
-		formulaFrame <- tkframe(frame)
-		if (hasLhs){
-			tkgrid(labelRcmdr(outerOperatorsFrame, text=gettextRcmdr("Model Formula:     "), fg="blue"), operatorsFrame)
-			lhsVariable <- if (currentModel) tclVar(currentFields$lhs) else tclVar("")
-			rhsVariable <- if (currentModel) tclVar(currentFields$rhs) else tclVar("")
-			rhsEntry <- ttkentry(formulaFrame, width="50", textvariable=rhsVariable)
-			rhsXscroll <- ttkscrollbar(formulaFrame,
-				orient="horizontal", command=function(...) tkxview(rhsEntry, ...))
-			tkconfigure(rhsEntry, xscrollcommand=function(...) tkset(rhsXscroll, ...))
-			lhsEntry <- ttkentry(formulaFrame, width="10", textvariable=lhsVariable)
-			lhsScroll <- ttkscrollbar(formulaFrame,
-				orient="horizontal", command=function(...) tkxview(lhsEntry, ...))
-			tkconfigure(lhsEntry, xscrollcommand=function(...) tkset(lhsScroll, ...))
-			tkgrid(lhsEntry, labelRcmdr(formulaFrame, text=" ~    "), rhsEntry, sticky="w")
-			tkgrid(lhsScroll, labelRcmdr(formulaFrame, text=""), rhsXscroll, sticky="w")
-			tkgrid.configure(lhsScroll, sticky="ew")
-		}
-		else{
-			rhsVariable <- if (currentModel) tclVar(currentFields$rhs) else tclVar("")
-			rhsEntry <- ttkentry(formulaFrame, width="50", textvariable=rhsVariable)
-			rhsXscroll <- ttkscrollbar(formulaFrame,
-				orient="horizontal", command=function(...) tkxview(rhs, ...))
-			tkconfigure(rhsEntry, xscrollcommand=function(...) tkset(rhsXscroll, ...))
-			tkgrid(labelRcmdr(formulaFrame, text="   ~ "), rhsEntry, sticky="w")
-			tkgrid(labelRcmdr(formulaFrame, text=""), rhsXscroll, sticky="w")
-		}
-		tkgrid.configure(rhsXscroll, sticky="ew")
-	})
+modelFormula3 <- defmacro(frame=top, hasLhs=TRUE, expr={
+    checkAddOperator <- function(rhs){
+        rhs.chars <- rev(strsplit(rhs, "")[[1]])
+        if (length(rhs.chars) < 1) return(FALSE)
+        check.char <- if ((rhs.chars[1] != " ") || (length(rhs.chars) == 1))
+            rhs.chars[1] else rhs.chars[2]
+        !is.element(check.char, c("+", "*", ":", "/", "-", "^", "(", "%"))
+    }
+    .variables <- Variables()
+    word <- paste("\\[", gettextRcmdr("factor"), "\\]", sep="")
+    variables <- paste(.variables,
+        ifelse(is.element(.variables, Factors()), paste("[", gettextRcmdr("factor"), "]", sep=""), ""))
+    xBox <- variableListBox(frame, variables, selectmode="multiple", title=gettextRcmdr("Variables (double-click to formula)"))
+    onDoubleClick <- if (!hasLhs){
+        function(){
+            var <- getSelection(xBox)
+            tkselection.clear(xBox$listbox, "0", "end")            		
+            if (length(grep(word, var)) == 1) var <- sub(word, "",  var)
+            tkfocus(rhsEntry)
+            rhs <- tclvalue(rhsVariable)
+            rhs.chars <- rev(strsplit(rhs, "")[[1]])
+            check.char <- if (length(rhs.chars) > 0){
+                if ((rhs.chars[1] != " ") || (length(rhs.chars) == 1))
+                    rhs.chars[1] else rhs.chars[2]
+            }
+            else ""
+            tclvalue(rhsVariable) <- if (rhs == "" ||
+                    is.element(check.char, c("+", "*", ":", "/", "-", "^", "(", "%")))
+                paste(rhs, var, sep="")
+            else paste(rhs, "+", var)
+            tkicursor(rhsEntry, "end")
+            tkxview.moveto(rhsEntry, "1")
+        }
+    }
+    else{
+        function(){
+            var <- getSelection(xBox)
+            which <- tkcurselection(xBox$listbox)
+            tkselection.clear(xBox$listbox, "0", "end")
+            if (length(grep(word, var)) == 1) var <- sub(word, "",  var)
+            lhs <- tclvalue(lhsVariable)
+            if (lhs == "" || tclvalue(tkselection.present(lhsEntry)) == "1"){
+                tclvalue(lhsVariable) <- var
+                tkselection.clear(lhsEntry)
+                tkfocus(rhsEntry)
+            }
+            else {
+                tkfocus(rhsEntry)
+                rhs <- tclvalue(rhsVariable)
+                rhs.chars <- rev(strsplit(rhs, "")[[1]])
+                check.char <- if (length(rhs.chars) > 0){
+                    if ((rhs.chars[1] != " ") || (length(rhs.chars) == 1))
+                        rhs.chars[1] else rhs.chars[2]
+                }
+                else ""
+                tclvalue(rhsVariable) <- if (rhs == "" ||
+                        is.element(check.char, c("+", "*", ":", "/", "-", "^", "(", "%", "r(")))
+                    paste(rhs, var, sep="")
+                else paste(rhs, "+", var)
+            }
+            tkicursor(rhsEntry, "end")
+            tkxview.moveto(rhsEntry, "1")
+        }
+    }
+    tkbind(xBox$listbox, "<Double-ButtonPress-1>", onDoubleClick)
+    onPlus <- function(){
+        rhs <- tclvalue(rhsVariable)
+        var <- getSelection(xBox)
+        tkselection.clear(xBox$listbox, "0", "end")										
+        if ((check <- !checkAddOperator(rhs)) && length(var) == 0) return()
+        if (length(var) > 1){
+            if (length(grep(word, var)) > 0) var <- sub(word, "",  var)
+            if (length(var) > 1) var <- paste(var, collapse=" + ")
+        }
+        tclvalue(rhsVariable) <- paste(rhs, if (!check) " + ", var, sep="")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    onTimes <- function(){
+        rhs <- tclvalue(rhsVariable)
+        var <- getSelection(xBox)
+        tkselection.clear(xBox$listbox, "0", "end")						
+        if ((check <- !checkAddOperator(rhs)) && length(var) == 0) return()
+        if (length(var) > 1){
+            if (length(grep(word, var)) > 0) var <- sub(word, "",  var)
+            var <- trim.blanks(var)
+            if (length(var) > 1) var <- paste(var, collapse="*")
+            tclvalue(rhsVariable) <- paste(rhs, if (!check) " + ", var, sep="")
+        }
+        else tclvalue(rhsVariable) <- paste(rhs, if (!check) "*", sep="")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    onColon <- function(){
+        rhs <- tclvalue(rhsVariable)
+        var <- getSelection(xBox)
+        tkselection.clear(xBox$listbox, "0", "end")						
+        if ((check <- !checkAddOperator(rhs)) && length(var) == 0) return()
+        if (length(var) > 1){
+            if (length(grep(word, var)) > 0) var <- sub(word, "",  var)
+            var <- trim.blanks(var)
+            if (length(var) > 1) var <- paste(var, collapse=":")
+            tclvalue(rhsVariable) <- paste(rhs, if (!check) " + ", var, sep="")
+        }
+        else tclvalue(rhsVariable) <- paste(rhs, if (!check) ":", sep="")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    onSlash <- function(){
+        rhs <- tclvalue(rhsVariable)
+        if (!checkAddOperator(rhs)) return()
+        tclvalue(rhsVariable) <- paste(rhs, "/",  sep="")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    onIn <- function(){
+        rhs <- tclvalue(rhsVariable)
+        if (!checkAddOperator(rhs)) return()
+        tclvalue(rhsVariable) <- paste(rhs, "%in% ")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    onMinus <- function(){
+        rhs <- tclvalue(rhsVariable)
+        if (!checkAddOperator(rhs)) return()
+        tclvalue(rhsVariable) <- paste(rhs, "- ")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    onPower <- function(){
+        rhs <- tclvalue(rhsVariable)
+        if (!checkAddOperator(rhs)) return()
+        tclvalue(rhsVariable) <- paste(rhs, "^", sep="")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    onLeftParen <- function(){
+        tkfocus(rhsEntry)
+        rhs <- tclvalue(rhsVariable)
+        tclvalue(rhsVariable) <- paste(rhs, "(", sep="")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    onRightParen <- function(){
+        rhs <- tclvalue(rhsVariable)
+        if (!checkAddOperator(rhs)) return()
+        tclvalue(rhsVariable) <- paste(rhs, ")", sep="")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+	onRandom <- function(){
+		tkfocus(rhsEntry)
+		rhs <- tclvalue(rhsVariable)
+		tclvalue(rhsVariable) <- paste(rhs, "r(", sep="")
+		tkicursor(rhsEntry, "end")
+		tkxview.moveto(rhsEntry, "1")
+	}
+    outerOperatorsFrame <- tkframe(frame)
+    operatorsFrame <- tkframe(outerOperatorsFrame)
+    splinePolyFrame <- tkframe(outerOperatorsFrame)
+    plusButton <- buttonRcmdr(operatorsFrame, text="+", width="3", command=onPlus)
+    timesButton <- buttonRcmdr(operatorsFrame, text="*", width="3", command=onTimes)
+    colonButton <- buttonRcmdr(operatorsFrame, text=":", width="3", command=onColon)
+    slashButton <- buttonRcmdr(operatorsFrame, text="/", width="3", command=onSlash)
+    inButton <- buttonRcmdr(operatorsFrame, text="%in%", width="5", command=onIn)
+    minusButton <- buttonRcmdr(operatorsFrame, text="-", width="3", command=onMinus)
+    powerButton <- buttonRcmdr(operatorsFrame, text="^", width="3", command=onPower)
+    leftParenButton <- buttonRcmdr(operatorsFrame, text="(", width="3", command=onLeftParen)
+    rightParenButton <- buttonRcmdr(operatorsFrame, text=")", width="3", command=onRightParen)
+	randomButton <- buttonRcmdr(operatorsFrame, text="r(", width="3", command=onRandom)
+    onBSpline <- function(){
+        rhs <- tclvalue(rhsVariable)
+        var <- getSelection(xBox)
+        tkselection.clear(xBox$listbox, "0", "end")
+        if (length(var) == 0) var <- " "
+        if (grepl("\\[factor\\]", var)){
+            Message("spline requires a numeric variable", type="error")
+            return()
+        }
+        if (length(var) > 1){
+            Message("cannot select more than one variable", type="error")
+            return()
+        }
+        check <- !checkAddOperator(rhs)
+        tclvalue(rhsVariable) <- paste(rhs, 
+            if (!check) paste(" + bs(", var, ", df=", tclvalue(dfSplineVar), ")", sep="") 
+            else paste(" bs(", var, ", df=", tclvalue(dfSplineVar), ")", sep=""),
+            sep="")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    onNatSline <- function(){
+        rhs <- tclvalue(rhsVariable)
+        var <- getSelection(xBox)
+        tkselection.clear(xBox$listbox, "0", "end")
+        if (length(var) == 0) var <- " "
+        if (grepl("\\[factor\\]", var)){
+            Message("spline requires a numeric variable", type="error")
+            return()
+        }
+        if (length(var) > 1){
+            Message("cannot select more than one variable", type="error")
+            return()
+        }
+        check <- !checkAddOperator(rhs)
+        tclvalue(rhsVariable) <- paste(rhs, 
+            if (!check) paste(" + ns(", var, ", df=", tclvalue(dfSplineVar), ")", sep="") 
+            else paste(" ns(", var, ", df=", tclvalue(dfSplineVar), ")", sep=""),
+            sep="")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    onPoly <- function(){
+        rhs <- tclvalue(rhsVariable)
+        var <- getSelection(xBox)
+        tkselection.clear(xBox$listbox, "0", "end")
+        if (length(var) == 0) var <- " "
+        if (grepl("\\[factor\\]", var)){
+            Message("polynomial requires a numeric variable", type="error")
+            return()
+        }
+        if (length(var) > 1){
+            Message("cannot select more than one variable", type="error")
+            return()
+        }
+        check <- !checkAddOperator(rhs)
+        tclvalue(rhsVariable) <- paste(rhs, 
+            if (!check) paste(" + poly(", var, ", degree=", tclvalue(degPolyVar), ")", sep="") 
+            else paste(" poly(", var, ", degree=", tclvalue(degPolyVar), ")", sep=""),
+            sep="")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    onRawPoly <- function(){
+        rhs <- tclvalue(rhsVariable)
+        var <- getSelection(xBox)
+        tkselection.clear(xBox$listbox, "0", "end")
+        if (length(var) == 0) var <- " "
+        if (grepl("\\[factor\\]", var)){
+            Message("polynomial requires a numeric variable", type="error")
+            return()
+        }
+        if (length(var) > 1){
+            Message("cannot select more than one variable", type="error")
+            return()
+        }
+        check <- !checkAddOperator(rhs)
+        tclvalue(rhsVariable) <- paste(rhs, 
+            if (!check) paste(" + poly(", var, ", degree=", tclvalue(degPolyVar), ", raw=TRUE)", sep="") 
+            else paste(" poly(", var, ", degree=", tclvalue(degPolyVar), ", raw=TRUE)", sep=""),
+            sep="")
+        tkicursor(rhsEntry, "end")
+        tkxview.moveto(rhsEntry, "1")
+    }
+    bsplineButton <- buttonRcmdr(splinePolyFrame, text=gettextRcmdr("B-spline\n"), width="10", command=onBSpline)
+    nsplineButton <- buttonRcmdr(splinePolyFrame, text=gettextRcmdr("natural\nspline"), width="10", command=onNatSline)
+    polyButton <- buttonRcmdr(splinePolyFrame, text=gettextRcmdr("orthogonal\npolynomial"), width="10", command=onPoly)
+    RawPolyButton <- buttonRcmdr(splinePolyFrame, text=gettextRcmdr("raw\npolynomial"), width="10", command=onRawPoly)
+    dfSplineVar <- tclVar("5")
+    degPolyVar <- tclVar("2")
+    dfDegFrame <- tkframe(outerOperatorsFrame)
+    dfSplineSpin <- tkspinbox(dfDegFrame, textvariable=dfSplineVar, state="readonly", from=2, to=10, width=2)
+    degPolySpin <- tkspinbox(dfDegFrame, textvariable=degPolyVar, state="readonly", from=2, to=5, width=2)
+    tkgrid(plusButton, timesButton, colonButton, slashButton, inButton, minusButton,
+        powerButton, leftParenButton, rightParenButton, randomButton, sticky="w")
+    tkgrid(labelRcmdr(dfDegFrame, text=gettextRcmdr("df for splines: ")), dfSplineSpin,  sticky="se")
+    tkgrid(labelRcmdr(dfDegFrame, text=gettextRcmdr("deg. for polynomials: ")), degPolySpin, sticky="se")
+    formulaFrame <- tkframe(frame)
+    formulaFrameMain <- tkframe(formulaFrame)
+    onFormulaHelp <- function () print(help("formula"))
+    formulaHelpButton <- buttonRcmdr(formulaFrame, text=gettextRcmdr("Model formula\nhelp"), command=onFormulaHelp,
+        image="::image::helpIcon", compound="left")
+    if (hasLhs){
+        tkgrid(labelRcmdr(outerOperatorsFrame, text=gettextRcmdr("Model Formula"), 
+            fg=getRcmdr("title.color"), font="RcmdrTitleFont"), sticky="w")
+        tkgrid(labelRcmdr(outerOperatorsFrame, text="Operators (click to formula):  "), operatorsFrame, sticky="nw")
+        tkgrid(bsplineButton, nsplineButton, polyButton, RawPolyButton, sticky="nw")
+        tkgrid(labelRcmdr(outerOperatorsFrame, text=gettextRcmdr("Splines/Polynomials:\n(select variable and click)")), 
+            splinePolyFrame, dfDegFrame, sticky="nw")
+        lhsVariable <- if (currentModel) tclVar(currentFields$lhs) else tclVar("")
+        rhsVariable <- if (currentModel) tclVar(currentFields$rhs) else tclVar("")
+        rhsEntry <- ttkentry(formulaFrameMain, width="75", textvariable=rhsVariable)
+        rhsXscroll <- ttkscrollbar(formulaFrameMain,
+            orient="horizontal", command=function(...) tkxview(rhsEntry, ...))
+        tkconfigure(rhsEntry, xscrollcommand=function(...) tkset(rhsXscroll, ...))
+        lhsEntry <- ttkentry(formulaFrameMain, width="10", textvariable=lhsVariable)
+        lhsScroll <- ttkscrollbar(formulaFrameMain,
+            orient="horizontal", command=function(...) tkxview(lhsEntry, ...))
+        tkconfigure(lhsEntry, xscrollcommand=function(...) tkset(lhsScroll, ...))
+        tkgrid(lhsEntry, labelRcmdr(formulaFrameMain, text=" ~    "), rhsEntry, sticky="w")
+        tkgrid(lhsScroll, labelRcmdr(formulaFrameMain, text=""), rhsXscroll, sticky="w")
+        tkgrid.configure(lhsScroll, sticky="ew")
+        tkgrid(formulaFrameMain, labelRcmdr(formulaFrame, text="  "), formulaHelpButton, sticky="nw")
+    }
+    else{
+        rhsVariable <- if (currentModel) tclVar(currentFields$rhs) else tclVar("")
+        rhsEntry <- ttkentry(formulaFrameMain, width="75", textvariable=rhsVariable)
+        rhsXscroll <- ttkscrollbar(formulaFrameMain,
+            orient="horizontal", command=function(...) tkxview(rhsEntry, ...))
+        tkconfigure(rhsEntry, xscrollcommand=function(...) tkset(rhsXscroll, ...))
+        tkgrid(labelRcmdr(formulaFrameMain, text="   ~ "), rhsEntry, sticky="w")
+        tkgrid(labelRcmdr(formulaFrameMain, text=""), rhsXscroll, sticky="w")
+        tkgrid(formulaFrameMain, labelRcmdr(formulaFrame, text="  "), formulaHelpButton, sticky="nw")
+    }
+    tkgrid.configure(rhsXscroll, sticky="ew")
+})
 
 
 #################################################

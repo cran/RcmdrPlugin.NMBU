@@ -115,6 +115,8 @@
 \alias{RelComp}
 \alias{resetGLMNMBU}
 \alias{resetLinearModelNMBU}
+\alias{resetMNLNMBU}
+\alias{resetPOLRNMBU}
 \alias{saveAll}
 \alias{saveAllAs}
 \alias{saveAllWorker}
@@ -244,12 +246,14 @@
   }
 }
 \author{
-Kristian Hovde Liland <kristian.liland@umb.no>
+Kristian Hovde Liland <kristian.liland@nmbu.no>
 }
 \keyword{ package }
 \examples{
 \dontrun{
+## This example shows alternative ways of starting 
+## package using the official plugin or an unofficial wrapper.
 library(RcmdrPlugin.NMBU) # Starts up the R Commander including this plugin.
-library(umb) # Simpler startup with automatic update (when available)
+library(nmbu) # Simpler startup with automatic update hosted by NMBU (when available).
 }
 }

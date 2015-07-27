@@ -32,7 +32,7 @@
         }
     }
 	putRcmdr("allFileName",NULL) # Prepare variable on package load
-	options(contrasts=c('contr.sum','contr.poly'))
+#	options(contrasts=c('contr.sum','contr.poly'))
 	tkbind(CommanderWindow(), "<Control-e>", onExportE)
 	tkbind(CommanderWindow(), "<Control-E>", onExportN)
 	if(!("package:nmbu"%in%search())){

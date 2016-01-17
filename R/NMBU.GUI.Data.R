@@ -250,7 +250,9 @@ auto.import.GUI <- function(){
         return()
       }
     }
-    command <- paste(dsnameValue, " <- read.table('clipboard', strip.white=",the.import$strip.white,", sep='",the.import$sep,"', na.strings='NA', header=",the.import$header,", dec='",the.import$dec,"')", sep="")
+    MAC <- Sys.info()[1] == "Darwin"
+    cl <- ifelse(MAC,"pipe(\'pbpaste\')", "\'clipboard\'")
+    command <- paste(dsnameValue, " <- read.table(", cl, ", strip.white=",the.import$strip.white,", sep='",the.import$sep,"', na.strings='NA', header=",the.import$header,", dec='",the.import$dec,"')", sep="")
 #    assign(dsnameValue, the.import[[1]], envir=.GlobalEnv)
 #    logger(command)
     doItAndPrint(command)

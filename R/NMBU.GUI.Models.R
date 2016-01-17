@@ -793,7 +793,7 @@ anova_reg_GUI <- function(){
 PRESS.GUI <- function(){
   doItAndPrint(paste("PRESS(", ActiveModel(), ")", sep=""))
   doItAndPrint(paste("R2pred(", ActiveModel(), ")", sep=""))
-  doItAndPrint(paste("RMSEP(", ActiveModel(), ")", sep=""))
+  doItAndPrint(paste("rmsep(", ActiveModel(), ")", sep=""))
 }
 
 ######################################

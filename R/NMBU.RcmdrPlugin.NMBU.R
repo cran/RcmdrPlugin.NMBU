@@ -40,6 +40,7 @@
 	  packageStartupMessage(paste("Re-open a closed R Commander with the command: Commander()\nPlease report bugs to kristian.liland@nmbu.no\n"), domain="R-RcmdrPlugin.NMBU")
 	  packageStartupMessage(paste("Currently installed:\n", R.Version()$version.string, "", sep=""), domain="R-RcmdrPlugin.NMBU")
 	  packageStartupMessage(paste("R Commander version ", packageDescription("Rcmdr")[["Version"]], "", sep=""), domain="R-RcmdrPlugin.NMBU")
+	  packageStartupMessage(paste("mixlm version ", packageDescription("mixlm")[["Version"]], "", sep=""), domain="R-RcmdrPlugin.NMBU")
 	  packageStartupMessage(paste("RcmdrPlugin.NMBU version ", packageDescription("RcmdrPlugin.NMBU")[["Version"]], "", sep=""), domain="R-RcmdrPlugin.NMBU")
 	  packageStartupMessage(paste("----------------------------------------------------------\n"), domain="R-RcmdrPlugin.NMBU")
 	}

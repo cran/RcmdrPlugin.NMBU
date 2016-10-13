@@ -291,34 +291,34 @@ deleteActiveDataSet <- function(){
 }
 
 
-########################
-# Update factor
-updateFactor <- function(){
-  initializeDialog(title=gettextRcmdr("Update factor (remove orphaned levels)"))
-  xBox <- variableListBox(top, Factors(), title=gettextRcmdr("Factors (pick one or more)"),
-                          selectmode="multiple")
-  onOK <- function(){ # Actions to perform
-    x <- getSelection(xBox)
-    closeDialog()
-    if (length(x) == 0) {
-      errorCondition(recall=updateFactor, message=gettextRcmdr("You must select one or more factors."))
-      return()
-    }
-    xx <- paste('"', x, '"', sep="")
-    .activeDataSet <- ActiveDataSet()
-	for(i in 1:length(x)){
-		command <- paste(.activeDataSet, "[,'", x[i],"'] <- factor(", .activeDataSet, "[,'", x[i],"'])", sep="")
-		justDoIt(command)
-		logger(command)
-	}
-    tkfocus(CommanderWindow())
-  }
-  # Set up GUI
-  OKCancelHelp(helpSubject="scale")
-  tkgrid(getFrame(xBox), sticky="w")
-  tkgrid(buttonsFrame, sticky="w")
-  dialogSuffix(rows=2, columns=1)
-}
+# ########################
+# # Update factor
+# updateFactor <- function(){
+#   initializeDialog(title=gettextRcmdr("Update factor (remove orphaned levels)"))
+#   xBox <- variableListBox(top, Factors(), title=gettextRcmdr("Factors (pick one or more)"),
+#                           selectmode="multiple")
+#   onOK <- function(){ # Actions to perform
+#     x <- getSelection(xBox)
+#     closeDialog()
+#     if (length(x) == 0) {
+#       errorCondition(recall=updateFactor, message=gettextRcmdr("You must select one or more factors."))
+#       return()
+#     }
+#     xx <- paste('"', x, '"', sep="")
+#     .activeDataSet <- ActiveDataSet()
+# 	for(i in 1:length(x)){
+# 		command <- paste(.activeDataSet, "[,'", x[i],"'] <- factor(", .activeDataSet, "[,'", x[i],"'])", sep="")
+# 		justDoIt(command)
+# 		logger(command)
+# 	}
+#     tkfocus(CommanderWindow())
+#   }
+#   # Set up GUI
+#   OKCancelHelp(helpSubject="scale")
+#   tkgrid(getFrame(xBox), sticky="w")
+#   tkgrid(buttonsFrame, sticky="w")
+#   dialogSuffix(rows=2, columns=1)
+# }
 
 
 ########################

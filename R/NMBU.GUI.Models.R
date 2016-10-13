@@ -520,22 +520,41 @@ contrastGUI2 <- function(varNumb,levs){
     }
     # level.name <- justDoIt(paste("names(",.activeModel, "$xlevels)", sep=""))
 	Library("gmodels")
-    command <- paste("print(fit.contrast(model=", ActiveModel(), ", varname='",fn, "', df=TRUE, coeff=c(", effValues[1], sep="")
+    command <- paste("fit.contrast(model=", ActiveModel(), ", varname='",fn, "', df=TRUE, coeff=c(", effValues[1], sep="")
     for(i in 2:n.eff){
       command <- paste(command, ", ", effValues[i], sep="")
     }
-    command <- paste(command, "), conf.int=", levelValue,"))", sep="")
+    command <- paste(command, "), conf.int=", levelValue,")", sep="")
     
-    # If interaction, test per level, not across levels
+    # If interaction, test across levels and per level
     has.interaction <- justDoIt(paste("max(apply(attr(",.activeModel, "$terms,'factors'),1,sum))>1", sep=""))
     if(length(levs)>1 && has.interaction){
-      the.levels <- justDoIt(paste("levels(",ActiveDataSet(),"$",names(levs[3-varNumb]),")",sep=""))
-      for(i in 1:length(the.levels)){
-        doItAndPrint(paste(paste("cat('Contrast for ",names(levs[3-varNumb]), " = ", the.levels[1], "\n')", sep=""),command, sep="; "))
-        #				doItAndPrint(command)
-        the.levels <- c(the.levels[-1],the.levels[1])
-        doItAndPrint(paste(ActiveDataSet(),"$",names(levs[3-varNumb]), " <- factor(", ActiveDataSet(),"$",names(levs[3-varNumb]), ", levels=c('",paste(the.levels,sep="",collapse="','"),"'))",sep=""))
+      doItAndPrint("# Test across remaining factor levels:")
+      doItAndPrint(command)
+      doItAndPrint("# Test within combinations of remaining factor levels:")
+
+      command <- paste("testInteractions(", .activeModel, ", custom=list(", fn, "=c(", effValues[1], sep="")
+      for(i in 2:n.eff){
+        command <- paste(command, ", ", effValues[i], sep="")
       }
+      dataClasses <- justDoIt(paste("attr(", .activeModel, "$terms,'dataClasses')", sep=""))[-1]
+      dataClasses <- names(dataClasses[dataClasses=="factor"])
+      dataClasses <- dataClasses[dataClasses!=fn]
+      command <- paste(command, ")), fixed=c('", dataClasses[1], sep="")
+      if(length(dataClasses)>1){
+        for(i in 2:length(dataClasses))
+          command <- paste(command, "','", dataClasses[i], sep="")
+      }
+      command <- paste(command, "'), adjustment = 'none')", sep ="")
+      doItAndPrint(command)
+
+      # the.levels <- justDoIt(paste("levels(",ActiveDataSet(),"$",names(levs[3-varNumb]),")",sep=""))
+      # for(i in 1:length(the.levels)){
+      #   doItAndPrint(paste(paste("cat('Contrast for ",names(levs[3-varNumb]), " = ", the.levels[1], "\n')", sep=""),command, sep="; "))
+      #   #				doItAndPrint(command)
+      #   the.levels <- c(the.levels[-1],the.levels[1])
+      #   doItAndPrint(paste(ActiveDataSet(),"$",names(levs[3-varNumb]), " <- factor(", ActiveDataSet(),"$",names(levs[3-varNumb]), ", levels=c('",paste(the.levels,sep="",collapse="','"),"'))",sep=""))
+      # }
     } else {
       doItAndPrint(command)
     }

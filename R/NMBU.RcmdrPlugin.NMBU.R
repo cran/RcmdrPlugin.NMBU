@@ -43,6 +43,9 @@
 	  packageStartupMessage(paste("mixlm version ", packageDescription("mixlm")[["Version"]], "", sep=""), domain="R-RcmdrPlugin.NMBU")
 	  packageStartupMessage(paste("RcmdrPlugin.NMBU version ", packageDescription("RcmdrPlugin.NMBU")[["Version"]], "", sep=""), domain="R-RcmdrPlugin.NMBU")
 	  packageStartupMessage(paste("----------------------------------------------------------\n"), domain="R-RcmdrPlugin.NMBU")
+	  packageStartupMessage(paste("An introduction to the R Commander is found at:"), domain="R-RcmdrPlugin.NMBU")
+	  packageStartupMessage(paste("http://repository.umb.no/R\n"), domain="R-RcmdrPlugin.NMBU")
+	  packageStartupMessage(paste("----------------------------------------------------------\n"), domain="R-RcmdrPlugin.NMBU")
 	}
 }
 

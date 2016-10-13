@@ -849,3 +849,10 @@ formulaFields2 <- function(model, hasLhs=TRUE, glm=FALSE){
   }
   list(lhs=lhs, rhs=rhs, data=data, subset=subset, family=family, link=link)
 }
+
+
+# ################
+# # Show vignette
+# hjelp <- function(){
+#   vignette("guide", package="RcmdrPlugin.NMBU")
+# }

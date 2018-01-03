@@ -74,6 +74,7 @@
     item	stepwiseMenu		command			  "Forward/backward..."                                			forwardBackward       		"lmmP() || lmP()"         			""
     item	stepwiseMenu		command			  "Backward/forward..."                                			backwardForward       		"lmmP() || lmP()"         			""
     item	stepwiseMenu		command			  "Best subsets..."                                				bestSubsets       			"lmmP() || lmP()"         			""
+    item	stepwiseMenu		command			  "Forward (wide data set)..."                 					wideForwardAdd       		"lmmP() || lmP()"         			""
     item    modelsGraphsMenu    command           "Basic diagnostic plots"                        				plotModelNMBU                "lmmP() || lmP() || glmP()"          	""
     item    modelsGraphsMenu      command         "Residual quantile-comparison plot..."          residualQQPlot              "lmmP() || lmP()" "packageAvailable('car')"
     item    modelsGraphsMenu      command         "Component+residual plots"                      CRPlots                     "(lmmP() || lmP() || glmP())" "packageAvailable('car')"

@@ -213,6 +213,46 @@ forwardAdd <- function(){
   dialogSuffix(rows=3, columns=2)
 }
 
+wideForwardAdd <- function(){
+  .activeModel <- ActiveModel()
+  availableTerms <- justDoIt(paste("attr(",.activeModel,"$terms,'term.labels')",sep=""))
+  initializeDialog(title=gettextRcmdr("Stepwise forward selection (wide data set)"))
+  
+  # Boks for signifikans ved ny variabel
+  alphaName <- tclVar("0.2")
+  alphaFrame <- tkframe(top)
+  fullFrame <- tkframe(top)
+  alpha <- ttkentry(alphaFrame, width="10", textvariable=alphaName)
+  xBox <- variableListBox(top, availableTerms, selectmode="multiple", title=gettextRcmdr("Compulsory variables (pick zero or more)"))
+  onOK <- function(){ # Actions to perform
+    x <- getSelection(xBox)
+    closeDialog()
+    the.alpha <- tclvalue(alphaName)
+    if(trim.blanks(the.alpha) == gettextRcmdr("")){
+      warning('Please specify the alpha level for entering')
+    }
+    # fullmodel <- tclvalue(fullmodelVariable)
+    force.in <- 'NULL'
+    if(length(x)>0){
+      force.in <- paste("'",paste(x, collapse="+"),"'", sep="")}
+    command <- paste("wideForward(", Reduce(paste, deparse(formula(.activeModel))), ",", ActiveDataSet(),", alpha=", the.alpha, ", force.in=",force.in,")", sep="")
+    doItAndPrint(command)
+    tkfocus(CommanderWindow())
+  }
+  
+  # Set up GUI
+  OKCancelHelp(helpSubject="add", model=TRUE)
+  tkgrid(labelRcmdr(alphaFrame, text=gettextRcmdr("Alpha to enter:")), alpha, sticky="w")
+  tkgrid(alphaFrame, sticky="n")
+  # checkBoxes(frame="fullFrame", boxes=c("fullmodel"), initialValues=c("0"),
+  #            labels=gettextRcmdr(c("Extended output")))
+  tkgrid(fullFrame, sticky="n")
+  tkgrid(getFrame(xBox), sticky = "n")
+  tkgrid(buttonsFrame, stick="s")
+  tkgrid.configure(helpButton, sticky="se")
+  dialogSuffix(rows=3, columns=2)
+}
+
 backwardDrop <- function(){
   .activeModel <- ActiveModel()
   availableTerms <- justDoIt(paste("attr(",.activeModel,"$terms,'term.labels')",sep=""))

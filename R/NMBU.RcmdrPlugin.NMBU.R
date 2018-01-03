@@ -44,7 +44,7 @@
 	  packageStartupMessage(paste("RcmdrPlugin.NMBU version ", packageDescription("RcmdrPlugin.NMBU")[["Version"]], "", sep=""), domain="R-RcmdrPlugin.NMBU")
 	  packageStartupMessage(paste("----------------------------------------------------------\n"), domain="R-RcmdrPlugin.NMBU")
 	  packageStartupMessage(paste("An introduction to the R Commander is found at:"), domain="R-RcmdrPlugin.NMBU")
-	  packageStartupMessage(paste("http://repository.umb.no/R\n"), domain="R-RcmdrPlugin.NMBU")
+	  packageStartupMessage(paste("https://repository.nmbu.no/R\n"), domain="R-RcmdrPlugin.NMBU")
 	  packageStartupMessage(paste("----------------------------------------------------------\n"), domain="R-RcmdrPlugin.NMBU")
 	}
 }
@@ -73,13 +73,10 @@
 				icon="error", type="yesno")
 		if (tclvalue(response) == "yes") {
 			top <- tktoplevel(borderwidth=10)
-#			tkwm.iconbitmap(top, system.file("etc", "R-logo.ico", package="Rcmdr"))
 			tkwm.title(top, gettext("Install Missing Packages", domain="R-Rcmdr"))
 			locationFrame <- tkframe(top)
 			locationVariable <- tclVar("CRAN")
 			CRANbutton <- ttkradiobutton(locationFrame, variable=locationVariable, value="CRAN")
-#         Note: Bioconductor code not currently necessary
-#            BioconductorButton <- ttkradiobutton(locationFrame, variable=locationVariable, value="Bioconductor")
 			localButton <- ttkradiobutton(locationFrame, variable=locationVariable, value="local")
 			directoryVariable <- tclVar("")
 			directoryFrame <- tkframe(locationFrame)
@@ -97,7 +94,6 @@
 			tkgrid(browseButton, locationScroll, sticky="w")
 			tkgrid(locationScroll, sticky="ew")
 			tkgrid(labelRcmdr(locationFrame, text="CRAN"), CRANbutton, sticky="w")
-#            tkgrid(labelRcmdr(locationFrame, text="Bioconductor"), BioconductorButton, sticky="w")
 			tkgrid(labelRcmdr(locationFrame, text=gettext("Local package directory\n(must include PACKAGES index file)", domain="R-Rcmdr"),
 							justify="left"), localButton, directoryFrame, sticky="nw")
 			tkgrid(locationFrame, sticky="w")
@@ -116,13 +112,6 @@
 					if (!any(present)) return()
 					install.packages(missing.packages[present], lib=.libPaths()[1])		
 				}
-#                else if (location == "Bioconductor") {
-#                    packages <- CRAN.packages(CRAN=getOption("BIOC"))[,1]
-#                    present <- missing.packages %in% packages
-#                    if (!all(present)) errorMessage()
-#                    install.packages(missing.packages[present], lib=.libPaths()[1],
-#                        CRAN=getOption("BIOC"))
-#                    }
 				else {
 					directory <- paste("file:", tclvalue(directoryVariable), sep="")
 					packages <- available.packages(contriburl=directory)[,1]

@@ -49,6 +49,7 @@
 \alias{Fisher.aov}
 \alias{fittedLinePlot}
 \alias{forward}
+\alias{wideForwardAdd}
 \alias{forwardAdd}
 \alias{forwardBackward}
 \alias{generalizedLinearModelNMBU}
@@ -218,6 +219,7 @@
   \item \code{dotplotGUI()}                 
   \item \code{enterTableNMBU()}              
   \item \code{fittedLinePlot()}             
+  \item \code{wideForwardAdd()}                 
   \item \code{forwardAdd()}                 
   \item \code{forwardBackward()}            
   \item \code{hierarchicalClusterVariable()}

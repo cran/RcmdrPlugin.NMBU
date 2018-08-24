@@ -1,5 +1,5 @@
-f4b4f50f7d6d606a06f42f7d0b3d955e *DESCRIPTION
-d248ec8985b892e56dc606669e4be8f3 *NAMESPACE
+e4250a8ea63f096061101e00ea3c5ee9 *DESCRIPTION
+b94d93856f752b4675a85d571ae68694 *NAMESPACE
 39334aa5d798917eba524b1541dab208 *R/NMBU.GUI.Data.R
 052d91fe2651a2f453b179bb0b12c3a5 *R/NMBU.GUI.File.R
 6c7b2c9d16c8c06bd52dc9615530f451 *R/NMBU.GUI.Graphs.R
@@ -11,6 +11,7 @@ b1c5508c941848d7c5dec9d6b062e2a9 *R/NMBU.Statistics.R
 6c9a5e92ee41ae614130b7377da71fff *R/NMBU.Utilities.R
 ffe141c17156890d206deafec75915cd *R/globals.R
 46270b8fb335c94a362bbf7f7c487e80 *inst/etc/menus.txt
+dfa6486c5c9f2b0540c7c9a9ccf3e8ed *inst/etc/model-capabilities.txt
 07744ca421a85c47ccdf3d15ebb55ed1 *man/RcmdrPlugin.NMBU-package.Rd
 e6a82610298df4a59ba7ece80876430a *man/extend.colnames.Rd
 964c451e8f574421c6b71b00b525a641 *man/summaryMultinom.Rd

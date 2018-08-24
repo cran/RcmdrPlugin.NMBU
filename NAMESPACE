@@ -21,5 +21,6 @@ importFrom("utils", "help", "install.packages", "packageDescription",
 
 exportPattern("^[^\\.]") # Export all except .functions
  
+S3method(Confint, mvr)
 S3method(confint, mvr)
 S3method(xtable, numSummary)
